@@ -1,0 +1,20 @@
+ops-bill-rebuild.html
+  s_8ea5d32a62e6a5::t_55a45a8a225471 292-294,299-300,302-303
+  s_8ea5d32a62e6a5::t_f133518fdc7ba0 309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.49-trip",
+  "base_commit_sha": "35635d237319ada958aa7aa457ed2d23dae62274",
+  "prompts": {},
+  "sessions": {
+    "s_8ea5d32a62e6a5": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "7b4c8d73-adfc-4d9a-8b28-4b4de31fe2c0",
+        "model": "grok-4.7"
+      },
+      "human_author": "ddxi <ddxi@lpt019775.cn1.global.ctrip.com>"
+    }
+  }
+}
