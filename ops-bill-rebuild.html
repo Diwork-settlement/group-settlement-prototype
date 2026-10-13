@@ -289,22 +289,24 @@
     const FEE_OPTIONS = {
       commission: ['全部', '品牌使用费', '品牌技术服务费', '工程咨询费', '奖励管理费', '产品线费用', '设计费'],
       periodicLcc: ['品牌技术服务费', '市场营销费', 'ROM派驻费', '委托管理服务费', '系统维护费'],
-      onetime: ['品牌使用费', '工程咨询费', '奖励管理费', '系统安装费', '设计费', '工程技术服务费'],
-      periodicGroup: ['品牌使用费', '系统安装费', '工程咨询费', '设计费', '开店培训费', '前期服务费', '品牌技术服务费', '系统维护费', '市场营销费', '人工服务费']
+      periodicGroup: ['品牌技术服务费', '系统维护费', '市场营销费', '人工服务费'],
+      onetimeLcc: ['品牌使用费', '工程咨询费', '奖励管理费', '系统安装费', '设计费', '工程技术服务费'],
+      onetimeGroup: ['品牌使用费', '系统安装费', '工程咨询费', '设计费', '开店培训费', '前期服务费']
     };
 
     function currentFees() {
       const type = $('billType').value;
+      const party = $('partySelect').value;
+      const group = party === '合作集团-酒店账单';
       if (type === '分佣账单') return FEE_OPTIONS.commission;
-      if (type === '一次性费用账单') return FEE_OPTIONS.onetime;
-      if ($('partySelect').value === '合作集团-酒店账单') return FEE_OPTIONS.periodicGroup;
-      return FEE_OPTIONS.periodicLcc;
+      if (type === '一次性费用账单') return group ? FEE_OPTIONS.onetimeGroup : FEE_OPTIONS.onetimeLcc;
+      return group ? FEE_OPTIONS.periodicGroup : FEE_OPTIONS.periodicLcc;
     }
 
     function syncFees() {
       const type = $('billType').value;
       const party = $('partySelect').value;
-      const ready = type === '分佣账单' || type === '一次性费用账单' || (type === '周期性费用账单' && party);
+      const ready = type === '分佣账单' || ((type === '一次性费用账单' || type === '周期性费用账单') && party);
       const fees = ready ? currentFees() : [];
       const prev = $('feeSelect').value;
       $('feeSelect').innerHTML = '<option value="">请选择</option>' + fees.map((fee) => `<option value="${fee}">${fee}</option>`).join('');
