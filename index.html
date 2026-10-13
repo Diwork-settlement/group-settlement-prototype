@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>合作集团线上结算系统 - 原型导航</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="index-page">
+    <h1>合作集团线上结算系统</h1>
+    <p>按 9/10 业务评审纪要调整 · 分账推送 · 无轧差 · 应收应付实收实付 + 发票 · 收付款丽呈操作</p>
+
+    <div class="flow-path-banner" style="margin-bottom:16px">
+      <div class="flow-path-card path-rule">
+        <strong>分账推送（不合账）</strong>
+        分佣/分成、一次性、周期性各自独立账单；账期与推送节奏不同（周期约6号 / 分佣约10号）
+      </div>
+      <div class="flow-path-card path-bill">
+        <strong>工作台按账期合计</strong>
+        展示应收、应付、实收、实付与发票数据；不做轧差；收付款仅丽呈财务操作
+      </div>
+    </div>
+
+    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">合作集团端</h2>
+    <div class="index-links" style="margin-bottom:32px">
+      <div class="index-card">
+        <h3>结算首页</h3>
+        <p>按账期合计三类账单；发票待办；二期酒店结算占位</p>
+        <div class="links">
+          <a href="settlement-home.html">→ 结算首页</a>
+        </div>
+      </div>
+      <div class="index-card">
+        <h3>我的账单（分类型）</h3>
+        <p>对账 / 申请开票 / 上传应付发票（OCR）· 收付款只读</p>
+        <div class="links">
+          <a href="settlement-bill-list.html">→ 账单列表</a>
+          <a href="settlement-bill-detail.html?type=commission&scenario=pending">→ 分佣 · 待对账</a>
+          <a href="settlement-bill-detail.html?type=periodic&scenario=invoice">→ 周期性 · 申请开票</a>
+          <a href="settlement-bill-detail.html?type=onetime&scenario=upload">→ 一次性 · 上传发票 OCR</a>
+          <a href="settlement-bill-detail.html?type=commission&scenario=dispute">→ 分佣 · 有异议</a>
+          <a href="periodic-fee-detail.html?view=group&period=2026-08">→ 周期性费用酒店明细（现网融入）</a>
+        </div>
+      </div>
+      <div class="index-card">
+        <h3>佣金明细 + 账户</h3>
+        <p>订单级分佣明细；账户信息只读（OP 在合作集团模块维护）</p>
+        <div class="links">
+          <a href="commission-bill-list.html?view=group">→ 佣金日账单列表（客房/营销）</a>
+          <a href="commission-bill-detail.html?view=group&date=2026-07-31&biz=room">→ 明细 · 客房分佣（应收/应付分块）</a>
+          <a href="commission-bill-detail.html?view=group&date=2026-07-31&biz=mkt">→ 明细 · 营销分佣</a>
+          <a href="withdraw-account.html">→ 提现账户</a>
+          <a href="invoice-account.html">→ 发票信息</a>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">丽呈财务端</h2>
+    <div class="index-links">
+      <div class="index-card">
+        <h3>结算工作台</h3>
+        <p>账期筛选合计 · 无轧差 · 直连酒店二期占位</p>
+        <div class="links">
+          <a href="lcc-workbench.html">→ 结算工作台</a>
+        </div>
+      </div>
+      <div class="index-card">
+        <h3>账单管理</h3>
+        <p>异议处理、登记收款/付款、审上传发票</p>
+        <div class="links">
+          <a href="lcc-bill-list.html">→ 账单管理列表</a>
+          <a href="lcc-bill-detail.html?type=commission&scenario=pending">→ 待对账</a>
+          <a href="lcc-bill-detail.html?type=commission&scenario=dispute">→ 处理异议</a>
+          <a href="lcc-bill-detail.html?type=periodic&scenario=pay">→ 登记收付款</a>
+          <a href="lcc-bill-detail.html?type=onetime&scenario=inv_review">→ 审 OCR 发票</a>
+          <a href="periodic-fee-detail.html?view=lcc&period=2026-08">→ 周期性费用酒店明细（现网融入）</a>
+        </div>
+      </div>
+      <div class="index-card">
+        <h3>发票审核 + 佣金明细</h3>
+        <p>与酒店发票审核合并能力；丽呈视角佣金明细</p>
+        <div class="links">
+          <a href="lcc-invoice-review.html">→ 发票审核</a>
+          <a href="commission-bill-list.html?view=lcc">→ 佣金日账单（丽呈）</a>
+          <a href="commission-bill-detail.html?view=lcc&date=2026-07-31&biz=room">→ 明细 · 应收/应付分块</a>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">内部运维</h2>
+    <div class="index-links" style="margin-bottom:32px">
+      <div class="index-card">
+        <h3>账单重新生成</h3>
+        <p>按酒店、账单类型、费项和账期重新生成并推送。未生成和已生成的账单都可以处理。</p>
+        <div class="links">
+          <a href="ops-bill-rebuild.html">→ 账单重新生成并推送</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

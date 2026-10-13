@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发票账户审核 - 丽呈财务</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">丽呈财务</div>
+        <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
+        <a class="nav-sub-item" href="lcc-bill-list.html">账单管理</a>
+        <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单</a>
+        <a class="nav-sub-item active" href="lcc-invoice-review.html">发票账户审核</a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select"><option>Business</option></select>
+          <div class="user-info"><div class="user-avatar">马</div><span>马敏 · 丽呈财务</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <h1 class="page-title">发票账户审核</h1>
+        <p style="font-size:13px;color:var(--text-muted);margin:-4px 0 16px">关键信息变更需丽呈财务审核；非关键字段合作集团可自行修改即时生效</p>
+
+        <div class="filter-bar">
+          <div class="filter-item">
+            <span class="filter-label">合作集团</span>
+            <input type="text" class="filter-input" placeholder="集团名称">
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">审核状态</span>
+            <select class="filter-select">
+              <option selected>待审核</option>
+              <option>已通过</option>
+              <option>已驳回</option>
+              <option>全部</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">重置</button>
+          </div>
+        </div>
+
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="stat-label">待审核</div><div class="stat-value highlight">2</div></div>
+          <div class="stat-card"><div class="stat-label">本月已通过</div><div class="stat-value">8</div></div>
+          <div class="stat-card"><div class="stat-label">本月已驳回</div><div class="stat-value">1</div></div>
+        </div>
+
+        <div class="table-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>合作集团</th>
+                <th>公司名称</th>
+                <th>统一社会信用代码</th>
+                <th>纳税人资质</th>
+                <th>发票类型</th>
+                <th>提交时间</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>合作集团A</td>
+                <td>合作集团A管理有限公司</td>
+                <td>91310000MA1KXXXXXX</td>
+                <td>一般纳税人</td>
+                <td>增值税专用发票</td>
+                <td>2026-09-06 15:22</td>
+                <td><span class="tag tag-orange">待审核</span></td>
+                <td><button class="btn-link" onclick="openReview('groupa')">审核</button></td>
+              </tr>
+              <tr>
+                <td>合作集团F</td>
+                <td>合作集团F管理有限公司</td>
+                <td>91440000MA5XXXXXX</td>
+                <td>一般纳税人</td>
+                <td>增值税专用发票</td>
+                <td>2026-09-07 09:10</td>
+                <td><span class="tag tag-orange">待审核</span></td>
+                <td><button class="btn-link" onclick="openReview('groupf')">审核</button></td>
+              </tr>
+              <tr>
+                <td>合作集团E</td>
+                <td>合作集团E管理有限公司</td>
+                <td>91310000MA1FXXXXXX</td>
+                <td>一般纳税人</td>
+                <td>增值税普通发票</td>
+                <td>2026-09-01 11:00</td>
+                <td><span class="tag tag-green">已通过</span></td>
+                <td><button class="btn-link" onclick="openReview('groupe', true)">查看</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal" style="width:640px">
+      <div class="modal-header">
+        <div class="modal-title">审核发票账户</div>
+        <button class="modal-close" onclick="closeModal('reviewModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="info-grid" style="margin-bottom:16px">
+          <div>
+            <div class="info-row"><span class="info-label">合作集团</span><span class="info-value" id="rGroup">—</span></div>
+            <div class="info-row"><span class="info-label">公司名称</span><span class="info-value" id="rCompany">—</span></div>
+            <div class="info-row"><span class="info-label">信用代码</span><span class="info-value" id="rCode">—</span></div>
+            <div class="info-row"><span class="info-label">注册地址</span><span class="info-value">上海市徐汇区漕溪北路 XXX 号</span></div>
+            <div class="info-row"><span class="info-label">注册电话</span><span class="info-value">021-6433XXXX</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">开户银行</span><span class="info-value">中国工商银行上海分行</span></div>
+            <div class="info-row"><span class="info-label">银行账号</span><span class="info-value">6222 **** **** 6789</span></div>
+            <div class="info-row"><span class="info-label">纳税人资质</span><span class="info-value">一般纳税人</span></div>
+            <div class="info-row"><span class="info-label">发票类型</span><span class="info-value">增值税专用发票</span></div>
+            <div class="info-row"><span class="info-label">收件人</span><span class="info-value">张财务 · 138****5678</span></div>
+          </div>
+        </div>
+        <div class="form-item" id="rejectReasonItem" style="display:none">
+          <label><span class="req">*</span>驳回原因</label>
+          <textarea id="rejectReason" placeholder="请填写驳回原因，将通知合作集团修改"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" id="reviewFooter">
+        <button class="btn btn-default" onclick="showReject()">驳回</button>
+        <button class="btn btn-primary" onclick="closeModal('reviewModal');toast('审核通过，发票账户已生效')">审核通过</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/settlement.js"></script>
+  <script>
+    const data = {
+      groupa: { group: '合作集团A', company: '合作集团A管理有限公司', code: '91310000MA1KXXXXXX' },
+      groupf: { group: '合作集团F', company: '合作集团F管理有限公司', code: '91440000MA5XXXXXX' },
+      groupe: { group: '合作集团E', company: '合作集团E管理有限公司', code: '91310000MA1FXXXXXX' },
+    };
+
+    function openReview(key, readonly) {
+      const d = data[key];
+      document.getElementById('rGroup').textContent = d.group;
+      document.getElementById('rCompany').textContent = d.company;
+      document.getElementById('rCode').textContent = d.code;
+      document.getElementById('rejectReasonItem').style.display = 'none';
+      if (readonly) {
+        document.getElementById('reviewFooter').innerHTML = `
+          <button class="btn btn-default" onclick="closeModal('reviewModal')">关闭</button>
+        `;
+      } else {
+        document.getElementById('reviewFooter').innerHTML = `
+          <button class="btn btn-default" onclick="showReject()">驳回</button>
+          <button class="btn btn-primary" onclick="closeModal('reviewModal');toast('审核通过，发票账户已生效')">审核通过</button>
+        `;
+      }
+      openModal('reviewModal');
+    }
+
+    function showReject() {
+      document.getElementById('rejectReasonItem').style.display = 'flex';
+      document.getElementById('reviewFooter').innerHTML = `
+        <button class="btn btn-default" onclick="openReview('groupa')">取消</button>
+        <button class="btn btn-primary" style="background:var(--danger);border-color:var(--danger)" onclick="doReject()">确认驳回</button>
+      `;
+    }
+
+    function doReject() {
+      const reason = document.getElementById('rejectReason').value.trim();
+      if (!reason) { toast('请填写驳回原因'); return; }
+      closeModal('reviewModal');
+      toast('已驳回，已通知合作集团');
+    }
+  </script>
+</body>
+</html>

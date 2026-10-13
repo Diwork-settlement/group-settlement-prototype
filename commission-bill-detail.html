@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>佣金账单明细 - 合作集团线上结算</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select" id="headerRole"></select>
+          <div class="user-info"><div class="user-avatar" id="avatar">马</div><span id="userName">马敏 · 丽呈财务</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="detail-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <a href="#" class="btn btn-default btn-sm" id="backLink">← 返回</a>
+            <h1 class="page-title" id="pageTitle">佣金账单明细</h1>
+            <span id="bizTag"></span>
+          </div>
+          <div>
+            <button class="btn btn-default" onclick="toast('已下载')">下载账单</button>
+          </div>
+        </div>
+
+        <div class="scenario-bar">
+          <span class="sc-label">视角：</span>
+          <a id="linkLcc" href="#">丽呈财务</a>
+          <a id="linkGroup" href="#">合作集团</a>
+          <span class="sc-label" style="margin-left:12px">业务：</span>
+          <a id="linkRoom" href="#">客房分佣</a>
+          <a id="linkMkt" href="#">营销分佣</a>
+        </div>
+
+        <div class="info-grid" style="margin-bottom:12px">
+          <div class="info-card">
+            <div class="info-card-title">账单信息</div>
+            <div class="info-row"><span class="info-label">账单日期</span><span class="info-value" id="billDate">—</span></div>
+            <div class="info-row"><span class="info-label">业务类型</span><span class="info-value" id="bizName">—</span></div>
+            <div class="info-row"><span class="info-label">生成说明</span><span class="info-value">每日自动生成客房 / 营销分佣日账单</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">收付汇总（本日本类型）</div>
+            <div class="info-row"><span class="info-label">应收合计</span><span class="info-value" style="color:var(--primary);font-weight:600" id="sumRecv">—</span></div>
+            <div class="info-row"><span class="info-label">应付合计</span><span class="info-value" style="font-weight:600" id="sumPay">—</span></div>
+            <div class="info-row"><span class="info-label">说明</span><span class="info-value">应收/应付分块展示，便于收付款与收开发票</span></div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-item">
+            <span class="filter-label">酒店名称/UPID</span>
+            <input type="text" class="filter-input" placeholder="请输入酒店名称或UPID">
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">订单号</span>
+            <input type="text" class="filter-input" placeholder="请输入订单号">
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">订单来源</span>
+            <select class="filter-select"><option>全部</option><option>集团官网会员</option><option>联盟成员小程序</option><option>丽呈平台</option></select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">重置</button>
+          </div>
+        </div>
+
+        <!-- 应收块 -->
+        <div class="fee-group" id="recvBlock">
+          <div class="fee-group-header" onclick="toggleFeeGroup(this)">
+            <span class="fg-title"><span class="fg-chevron">▾</span> 应收明细 <span class="tag tag-blue" style="margin-left:6px">丽呈 → 集团</span></span>
+            <span class="fg-total" id="recvHead">应收合计 ¥ —</span>
+          </div>
+          <div class="fee-group-body">
+            <div class="money-strip" style="border:none;border-radius:0;margin:0">
+              <div class="ms-item"><div class="ms-label">应收金额</div><div class="ms-value recv" id="recvAmt">—</div></div>
+              <div class="ms-item"><div class="ms-label">对应开票</div><div class="ms-value" style="font-size:13px;font-weight:500">丽呈向集团开票 / 集团申请开票</div></div>
+              <div class="ms-item"><div class="ms-label">对应收付款</div><div class="ms-value" style="font-size:13px;font-weight:500">丽呈付款 · 集团实收（只读）</div></div>
+              <div class="ms-item"><div class="ms-label">笔数</div><div class="ms-value" id="recvCount">—</div></div>
+            </div>
+            <table class="data-table" id="recvTable"></table>
+          </div>
+        </div>
+
+        <!-- 应付块 -->
+        <div class="fee-group" id="payBlock">
+          <div class="fee-group-header" onclick="toggleFeeGroup(this)">
+            <span class="fg-title"><span class="fg-chevron">▾</span> 应付明细 <span class="tag tag-orange" style="margin-left:6px">集团 → 丽呈</span></span>
+            <span class="fg-total" id="payHead">应付合计 ¥ —</span>
+          </div>
+          <div class="fee-group-body">
+            <div class="money-strip" style="border:none;border-radius:0;margin:0">
+              <div class="ms-item"><div class="ms-label">应付金额</div><div class="ms-value pay" id="payAmt">—</div></div>
+              <div class="ms-item"><div class="ms-label">对应发票</div><div class="ms-value" style="font-size:13px;font-weight:500">集团向丽呈开票并上传（OCR）</div></div>
+              <div class="ms-item"><div class="ms-label">对应收付款</div><div class="ms-value" style="font-size:13px;font-weight:500">丽呈收款 · 集团实付（只读）</div></div>
+              <div class="ms-item"><div class="ms-label">笔数</div><div class="ms-value" id="payCount">—</div></div>
+            </div>
+            <table class="data-table" id="payTable"></table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="js/settlement.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const view = params.get('view') || 'group';
+    const date = params.get('date') || '2026-07-31';
+    const biz = params.get('biz') || 'room';
+    const isGroup = view === 'group';
+    const bizName = biz === 'mkt' ? '营销分佣' : '客房分佣';
+
+    document.getElementById('pageTitle').textContent = `${date} · ${bizName}明细`;
+    document.getElementById('billDate').textContent = date;
+    document.getElementById('bizName').textContent = bizName;
+    document.getElementById('bizTag').innerHTML = `<span class="tag ${biz==='mkt'?'tag-purple':'tag-blue'}">${bizName}</span>`;
+    document.getElementById('backLink').href = `commission-bill-list.html?view=${view}`;
+    document.getElementById('linkLcc').href = `?view=lcc&date=${date}&biz=${biz}`;
+    document.getElementById('linkGroup').href = `?view=group&date=${date}&biz=${biz}`;
+    document.getElementById('linkRoom').href = `?view=${view}&date=${date}&biz=room`;
+    document.getElementById('linkMkt').href = `?view=${view}&date=${date}&biz=mkt`;
+
+    document.getElementById('sidebar').innerHTML = isGroup ? `
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">结算中心</div>
+        <a class="nav-sub-item" href="settlement-home.html">结算首页</a>
+        <a class="nav-sub-item" href="settlement-bill-list.html">我的账单</a>
+        <a class="nav-sub-item active" href="commission-bill-list.html?view=group">佣金账单明细</a>
+        <div class="nav-group-title">账户信息</div>
+        <a class="nav-sub-item" href="withdraw-account.html">提现账户</a>
+        <a class="nav-sub-item" href="invoice-account.html">发票信息</a>
+      </nav>
+    ` : `
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">丽呈财务</div>
+        <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
+        <a class="nav-sub-item" href="lcc-bill-list.html">账单管理</a>
+        <a class="nav-sub-item active" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+        <a class="nav-sub-item" href="lcc-invoice-review.html">发票审核</a>
+      </nav>
+    `;
+    document.getElementById('headerRole').innerHTML = isGroup ? '<option>合作集团A</option>' : '<option>Business</option>';
+    document.getElementById('avatar').textContent = isGroup ? '张' : '马';
+    document.getElementById('userName').textContent = isGroup ? '张财务 · 合作集团A' : '马敏 · 丽呈财务';
+
+    // 应收 = 丽呈平台订单分佣给集团；应付 = 联盟/集团渠道订单分佣给丽呈
+    const recvOrders = biz === 'room' ? [
+      { time: `${date} 21:08:54`, group: '合作集团A', source: '丽呈平台小程序', upid: 'UP8A2K91', hotel: '丽呈酒店·示例店A', type: '预付', orderNo: 'ORD' + date.replace(/-/g,'') + '001', orderAmt: '268.00', payAmt: '250.00', commission: '16.08', fee: '0.80', split: '15.28', groupSplit: '10.19', lccSplit: '5.09' },
+      { time: `${date} 14:22:11`, group: '合作集团A', source: '丽呈平台小程序', upid: 'UP9C1D55', hotel: '丽呈酒店·示例店C', type: '预付', orderNo: 'ORD' + date.replace(/-/g,'') + '002', orderAmt: '458.00', payAmt: '430.00', commission: '27.48', fee: '1.20', split: '26.28', groupSplit: '17.52', lccSplit: '8.76' },
+      { time: `${date} 09:15:03`, group: '合作集团B', source: '丽呈平台小程序', upid: 'UP3B7M22', hotel: '丽呈酒店·示例店B', type: '预付', orderNo: 'ORD' + date.replace(/-/g,'') + '003', orderAmt: '199.00', payAmt: '199.00', commission: '11.94', fee: '0.00', split: '11.94', groupSplit: '7.96', lccSplit: '3.98' },
+    ] : [
+      { time: `${date} 18:40:20`, group: '合作集团A', source: '丽呈平台商城', upid: 'UP8A2K91', hotel: '丽呈酒店·示例店A', type: '营销品', orderNo: 'MKT' + date.replace(/-/g,'') + '001', orderAmt: '128.00', payAmt: '128.00', commission: '12.80', fee: '0.00', split: '12.80', groupSplit: '8.53', lccSplit: '4.27' },
+      { time: `${date} 11:05:44`, group: '合作集团A', source: '丽呈平台商城', upid: 'UP9C1D55', hotel: '丽呈酒店·示例店C', type: '营销品', orderNo: 'MKT' + date.replace(/-/g,'') + '002', orderAmt: '89.00', payAmt: '89.00', commission: '8.90', fee: '0.00', split: '8.90', groupSplit: '5.93', lccSplit: '2.97' },
+    ];
+
+    const payOrders = biz === 'room' ? [
+      { time: `${date} 20:01:33`, group: '合作集团A', source: '联盟成员小程序', upid: 'UP8A2K91', hotel: '丽呈酒店·示例店A', type: '预付', orderNo: 'ORD' + date.replace(/-/g,'') + '101', orderAmt: '320.00', payAmt: '300.00', commission: '19.20', fee: '0.60', split: '18.60', groupSplit: '12.40', lccSplit: '6.20' },
+      { time: `${date} 16:55:09`, group: '合作集团A', source: '集团官网会员', upid: 'UP8A2K91', hotel: '丽呈酒店·示例店A', type: '预付', orderNo: 'ORD' + date.replace(/-/g,'') + '102', orderAmt: '84.00', payAmt: '80.00', commission: '5.04', fee: '0.00', split: '5.04', groupSplit: '3.37', lccSplit: '1.67' },
+      { time: `${date} 12:18:50`, group: '合作集团A', source: '集团官网会员', upid: 'UP2E8F10', hotel: '丽呈酒店·示例店D', type: '预付', orderNo: 'ORD' + date.replace(/-/g,'') + '103', orderAmt: '560.00', payAmt: '520.00', commission: '33.60', fee: '1.50', split: '32.10', groupSplit: '21.40', lccSplit: '10.70' },
+    ] : [
+      { time: `${date} 19:22:08`, group: '合作集团A', source: '联盟成员小程序商城', upid: 'UP8A2K91', hotel: '丽呈酒店·示例店A', type: '营销品', orderNo: 'MKT' + date.replace(/-/g,'') + '101', orderAmt: '199.00', payAmt: '199.00', commission: '19.90', fee: '0.00', split: '19.90', groupSplit: '13.27', lccSplit: '6.63' },
+      { time: `${date} 10:33:17`, group: '合作集团A', source: '集团官网商城', upid: 'UP9C1D55', hotel: '丽呈酒店·示例店C', type: '营销品', orderNo: 'MKT' + date.replace(/-/g,'') + '102', orderAmt: '66.00', payAmt: '66.00', commission: '6.60', fee: '0.00', split: '6.60', groupSplit: '4.40', lccSplit: '2.20' },
+    ];
+
+    const recvList = isGroup ? recvOrders.filter(o => o.group === '合作集团A') : recvOrders;
+    const payList = isGroup ? payOrders.filter(o => o.group === '合作集团A') : payOrders;
+
+    function sumGroupSplit(list) {
+      return list.reduce((s, o) => s + parseFloat(o.groupSplit.replace(/,/g, '')), 0);
+    }
+    const recvTotal = sumGroupSplit(recvList);
+    const payTotal = sumGroupSplit(payList);
+    const fmt = n => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    document.getElementById('sumRecv').textContent = `¥ ${fmt(recvTotal)}`;
+    document.getElementById('sumPay').textContent = `¥ ${fmt(payTotal)}`;
+    document.getElementById('recvHead').textContent = `应收合计 ¥ ${fmt(recvTotal)}`;
+    document.getElementById('payHead').textContent = `应付合计 ¥ ${fmt(payTotal)}`;
+    document.getElementById('recvAmt').textContent = `¥ ${fmt(recvTotal)}`;
+    document.getElementById('payAmt').textContent = `¥ ${fmt(payTotal)}`;
+    document.getElementById('recvCount').textContent = `${recvList.length} 笔`;
+    document.getElementById('payCount').textContent = `${payList.length} 笔`;
+
+    function renderTable(elId, list, amountLabel) {
+      document.getElementById(elId).innerHTML = `
+        <thead>
+          <tr>
+            <th>下单时间</th>
+            ${isGroup ? '' : '<th>合作集团</th>'}
+            <th>订单来源</th>
+            <th>UPID</th>
+            <th>酒店名称</th>
+            <th>产品类型</th>
+            <th>订单号</th>
+            <th class="text-right">订单金额</th>
+            <th class="text-right">支付金额</th>
+            <th class="text-right">分佣佣金金额</th>
+            <th class="text-right">${amountLabel}</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(o => `
+            <tr>
+              <td style="white-space:nowrap">${o.time}</td>
+              ${isGroup ? '' : `<td>${o.group}</td>`}
+              <td>${o.source}</td>
+              <td>${o.upid}</td>
+              <td>${o.hotel}</td>
+              <td>${o.type}</td>
+              <td>${o.orderNo}</td>
+              <td class="text-right">${o.orderAmt}</td>
+              <td class="text-right">${o.payAmt}</td>
+              <td class="text-right">${o.split}</td>
+              <td class="text-right" style="font-weight:600">${o.groupSplit}</td>
+              <td><a class="btn-link" href="javascript:;" onclick="toast('跳转订单详情（原型）')">查看详情</a></td>
+            </tr>
+          `).join('') || '<tr><td colspan="12" class="empty-state">暂无明细</td></tr>'}
+        </tbody>
+      `;
+    }
+
+    renderTable('recvTable', recvList, '合作集团分佣金额（应收）');
+    renderTable('payTable', payList, '合作集团分佣金额（应付）');
+  </script>
+</body>
+</html>

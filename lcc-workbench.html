@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>结算工作台 - 丽呈财务</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">丽呈财务</div>
+        <a class="nav-sub-item active" href="lcc-workbench.html">结算工作台</a>
+        <a class="nav-sub-item" href="lcc-bill-list.html">账单管理</a>
+        <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+        <a class="nav-sub-item" href="lcc-invoice-review.html">发票审核</a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索合作集团 / 账单"></div>
+        <div class="header-right">
+          <select class="header-select"><option>Business</option></select>
+          <div class="user-info"><div class="user-avatar">马</div><span>马敏 · 丽呈财务</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <h1 class="page-title">结算工作台</h1>
+        <p style="font-size:13px;color:var(--text-muted);margin:-4px 0 16px">按账期筛选合计 · 分佣/一次性/周期性分账展示 · 无轧差 · 收付款由本端操作</p>
+
+        <div class="period-bar">
+          <span class="period-label">数据账期</span>
+          <select id="periodSelect" onchange="render()">
+            <option value="2026-08" selected>2026-08</option>
+            <option value="2026-07">2026-07</option>
+            <option value="2026-09">2026-09（当月）</option>
+          </select>
+          <select id="typeFilter" onchange="render()" style="height:32px;border:1px solid var(--border);border-radius:4px;padding:0 8px;font-size:13px">
+            <option value="all">全部账单类型</option>
+            <option value="commission">分佣 / 分成</option>
+            <option value="periodic">周期性费用</option>
+            <option value="onetime">一次性费用</option>
+          </select>
+          <button class="btn btn-primary" onclick="render()">查询</button>
+          <span class="period-hint">三类账单不合账推送；看板按账期合计应收应付实收实付与发票</span>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <h2>与合作集团结算 <span class="tag tag-blue">一期</span></h2>
+          </div>
+
+          <div class="workbench-stats" style="grid-template-columns:repeat(4,1fr)" id="moneyStats"></div>
+          <div class="workbench-stats" style="grid-template-columns:repeat(4,1fr);margin-top:12px" id="opsStats"></div>
+
+          <div class="process-banner" style="margin-bottom:12px">
+            <div class="process-steps">
+              <div class="process-step"><span class="step-num">1</span> 分类型生成账单</div>
+              <span class="process-arrow">→</span>
+              <div class="process-step"><span class="step-num">2</span> 按节奏推送（周期约6号 / 分佣约10号）</div>
+              <span class="process-arrow">→</span>
+              <div class="process-step"><span class="step-num">3</span> 集团对账 / 开票 / 上传发票</div>
+              <span class="process-arrow">→</span>
+              <div class="process-step"><span class="step-num">4</span> 丽呈登记收款付款</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-item">
+            <span class="filter-label">合作集团</span>
+            <input type="text" class="filter-input" placeholder="合作集团A/B…">
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">对账状态</span>
+            <select class="filter-select"><option>全部</option><option>待对账</option><option>有异议</option><option>已对账</option><option>已确认</option></select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">开票</span>
+            <select class="filter-select"><option>全部</option><option>未开票</option><option>待审核发票</option><option>已开票</option></select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">收款</span>
+            <select class="filter-select"><option>全部</option><option>未收款</option><option>已收款</option></select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">付款</span>
+            <select class="filter-select"><option>全部</option><option>未付款</option><option>已付款</option></select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">重置</button>
+          </div>
+        </div>
+
+        <div class="table-card table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>合作集团</th>
+                <th>账单类型</th>
+                <th>账单编号</th>
+                <th>账期</th>
+                <th class="text-right">应收</th>
+                <th class="text-right">应付</th>
+                <th class="text-right">实收</th>
+                <th class="text-right">实付</th>
+                <th>对账</th>
+                <th>发票</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- 二期：直连酒店 -->
+        <div class="section-block" style="margin-top:20px">
+          <div class="section-block-header">
+            <h2>与直连酒店结算 <span class="phase2-badge">二期规划 · 占位示意</span></h2>
+          </div>
+          <div class="phase2-placeholder">
+            <div class="phase2-desc">未加入合作集团的酒店结算将并列进入本看板。费项含一次性、周期性、客房、营销产品；客房/营销日结，周期性月结。</div>
+            <div class="fee-type-row">
+              <div class="fee-type-card"><div class="ft-name">一次性费用</div><div class="ft-cycle">按合同触发</div><div class="ft-amt">¥ —,—</div></div>
+              <div class="fee-type-card"><div class="ft-name">周期性费用</div><div class="ft-cycle">账单周期：按月</div><div class="ft-amt">¥ —,—</div></div>
+              <div class="fee-type-card"><div class="ft-name">客房</div><div class="ft-cycle">账单周期：日结</div><div class="ft-amt">¥ —,—</div></div>
+              <div class="fee-type-card"><div class="ft-name">营销产品</div><div class="ft-cycle">账单周期：日结</div><div class="ft-amt">¥ —,—</div></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="js/settlement.js"></script>
+  <script>
+    const agg = {
+      '2026-08': { recv: '1,286,450', pay: '1,892,300', got: '420,100', gave: '680,200', pending: 12, dispute: 3, invReview: 5, payTodo: 8 },
+      '2026-07': { recv: '1,150,200', pay: '1,720,800', got: '1,150,200', gave: '1,720,800', pending: 0, dispute: 1, invReview: 2, payTodo: 0 },
+      '2026-09': { recv: '0', pay: '0', got: '0', gave: '0', pending: 0, dispute: 0, invReview: 0, payTodo: 0 },
+    };
+    const rows = [
+      { g: '合作集团A', type: 'commission', typeName: '分佣/分成', no: 'BILL-GA-CM-202608', period: '2026-08', recv: '19,500', pay: '23,700', got: '0', gave: '0', recon: '待对账', reconTag: 'tag-orange', inv: '—', href: 'lcc-bill-detail.html?type=commission&scenario=pending' },
+      { g: '合作集团A', type: 'periodic', typeName: '周期性', no: 'BILL-GA-PD-202608', period: '2026-08', recv: '0', pay: '4,500', got: '0', gave: '0', recon: '已对账', reconTag: 'tag-blue', inv: '可开票', href: 'lcc-bill-detail.html?type=periodic&scenario=reconciled' },
+      { g: '合作集团A', type: 'onetime', typeName: '一次性', no: 'BILL-GA-OT-202608', period: '2026-08', recv: '0', pay: '15,000', got: '0', gave: '15,000', recon: '已确认', reconTag: 'tag-green', inv: '待审上传票', href: 'lcc-bill-detail.html?type=onetime&scenario=inv_review' },
+      { g: '合作集团B', type: 'commission', typeName: '分佣/分成', no: 'BILL-GB-CM-202608', period: '2026-08', recv: '86,420', pay: '112,800', got: '0', gave: '0', recon: '待对账', reconTag: 'tag-orange', inv: '—', href: 'lcc-bill-detail.html?type=commission&scenario=pending' },
+      { g: '合作集团C', type: 'commission', typeName: '分佣/分成', no: 'BILL-GC-CM-202608', period: '2026-08', recv: '45,100', pay: '68,200', got: '0', gave: '0', recon: '有异议', reconTag: 'tag-red', inv: '—', href: 'lcc-bill-detail.html?type=commission&scenario=dispute' },
+      { g: '合作集团D', type: 'periodic', typeName: '周期性', no: 'BILL-GD-PD-202608', period: '2026-08', recv: '0', pay: '12,800', got: '0', gave: '0', recon: '已对账', reconTag: 'tag-blue', inv: '待开票', href: 'lcc-bill-detail.html?type=periodic&scenario=pay' },
+    ];
+
+    function render() {
+      const p = document.getElementById('periodSelect').value;
+      const tf = document.getElementById('typeFilter').value;
+      const a = agg[p];
+      document.getElementById('moneyStats').innerHTML = `
+        <div class="wb-stat"><div class="wb-num primary">¥ ${a.recv}</div><div class="wb-label">应收合计（集团应付丽呈）</div></div>
+        <div class="wb-stat"><div class="wb-num">¥ ${a.pay}</div><div class="wb-label">应付合计（丽呈应付集团）</div></div>
+        <div class="wb-stat"><div class="wb-num" style="color:var(--success)">¥ ${a.got}</div><div class="wb-label">实收合计</div></div>
+        <div class="wb-stat"><div class="wb-num warn">¥ ${a.gave}</div><div class="wb-label">实付合计</div></div>
+      `;
+      document.getElementById('opsStats').innerHTML = `
+        <a class="wb-stat" href="lcc-bill-list.html?status=pending"><div class="wb-num warn">${a.pending}</div><div class="wb-label">待对账账单</div></a>
+        <a class="wb-stat" href="lcc-bill-list.html?status=dispute"><div class="wb-num danger">${a.dispute}</div><div class="wb-label">有异议</div></a>
+        <a class="wb-stat" href="lcc-invoice-review.html"><div class="wb-num danger">${a.invReview}</div><div class="wb-label">待审发票</div></a>
+        <a class="wb-stat" href="lcc-bill-list.html"><div class="wb-num">${a.payTodo}</div><div class="wb-label">待收款/付款</div></a>
+      `;
+      const list = rows.filter(r => r.period === p && (tf === 'all' || r.type === tf));
+      document.getElementById('tbody').innerHTML = list.length ? list.map(r => `
+        <tr>
+          <td>${r.g}</td>
+          <td>${r.typeName}</td>
+          <td><a href="${r.href}">${r.no}</a></td>
+          <td>${r.period}</td>
+          <td class="text-right">${r.recv}</td>
+          <td class="text-right">${r.pay}</td>
+          <td class="text-right">${r.got}</td>
+          <td class="text-right">${r.gave}</td>
+          <td><span class="tag ${r.reconTag}">${r.recon}</span></td>
+          <td>${r.inv}</td>
+          <td><a class="btn-link" href="${r.href}">处理</a></td>
+        </tr>
+      `).join('') : `<tr><td colspan="11" class="empty-state">本账期暂无数据（当月账单生成/推送中）</td></tr>`;
+    }
+    render();
+  </script>
+</body>
+</html>

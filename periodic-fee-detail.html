@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>周期性费用明细 - 合作集团线上结算</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+  <style>
+    .col-group th {
+      background: #fafafa;
+      text-align: center;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+    .col-group th.g-hotel { background: #f9f0ff; color: #722ed1; }
+    .col-group th.g-lcc { background: #e6f7ff; color: #1890ff; }
+    .col-group th.g-settle { background: #fff7e6; color: #d46b08; }
+    .col-group th.g-inv { background: #f6ffed; color: #389e0d; }
+    .integrate-note {
+      background: #e6f7ff;
+      border: 1px solid #91d5ff;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #096dd9;
+      line-height: 1.7;
+    }
+    .integrate-note strong { color: #003a8c; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select" id="headerRole"></select>
+          <div class="user-info"><div class="user-avatar" id="avatar">马</div><span id="userName">马敏 · 丽呈财务</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="detail-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <a href="#" class="btn btn-default btn-sm" id="backLink">← 返回账单</a>
+            <h1 class="page-title">周期性费用明细</h1>
+            <span class="tag tag-blue">酒店维度 · 现网演进</span>
+          </div>
+        </div>
+
+        <div class="integrate-note" id="integrateNote"></div>
+
+        <div class="scenario-bar">
+          <span class="sc-label">视角：</span>
+          <a href="?view=lcc&period=2026-08">丽呈财务</a>
+          <a href="?view=group&period=2026-08">合作集团（收付款只读）</a>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-item">
+            <span class="filter-label">酒店名称/UPID</span>
+            <input type="text" class="filter-input" placeholder="请输入">
+          </div>
+          <div class="filter-item" id="groupFilter">
+            <span class="filter-label">合作集团</span>
+            <select class="filter-select"><option>合作集团A</option><option>合作集团B</option></select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">费用月份</span>
+            <input type="text" class="filter-input" value="2026-08" style="min-width:100px">
+            <span style="color:var(--text-muted);align-self:flex-end;padding-bottom:8px">~</span>
+            <input type="text" class="filter-input" value="2026-08" style="min-width:100px">
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">丽呈应收状态</span>
+            <select class="filter-select"><option>全部</option><option>未结清</option><option>已结清</option></select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">重置</button>
+          </div>
+        </div>
+
+        <div class="money-strip" style="margin-bottom:12px">
+          <div class="ms-item"><div class="ms-label">丽呈应收集团（应付来源）</div><div class="ms-value recv">¥ 4,500.00</div></div>
+          <div class="ms-item"><div class="ms-label">已收 / 未收</div><div class="ms-value" style="font-size:16px">¥ 0.00 / ¥ 4,500.00</div></div>
+          <div class="ms-item"><div class="ms-label">关联结算账单</div><div class="ms-value" style="font-size:13px;font-weight:500"><a href="#" id="billLink">BILL-GA-PD-202608</a></div></div>
+          <div class="ms-item"><div class="ms-label">发票</div><div class="ms-value" style="font-size:13px;font-weight:500">待上传 / 可申请开票</div></div>
+        </div>
+
+        <div class="table-card table-scroll">
+          <table class="data-table" id="feeTable">
+            <thead>
+              <tr class="col-group">
+                <th rowspan="2" style="vertical-align:middle">酒店名称</th>
+                <th rowspan="2" style="vertical-align:middle">UPID</th>
+                <th rowspan="2" style="vertical-align:middle">费用时间</th>
+                <th colspan="4" class="g-hotel">合作集团应收酒店</th>
+                <th colspan="4" class="g-lcc">丽呈应收合作集团（=结算账单「应付」）</th>
+                <th colspan="3" class="g-settle">结算账单侧收付（只读引用）</th>
+                <th colspan="2" class="g-inv">发票</th>
+                <th rowspan="2" style="vertical-align:middle">操作</th>
+              </tr>
+              <tr>
+                <th class="text-right">总额</th>
+                <th class="text-right">已收</th>
+                <th class="text-right">未收</th>
+                <th>状态</th>
+                <th class="text-right">总额</th>
+                <th class="text-right">已收</th>
+                <th class="text-right">未收</th>
+                <th>状态</th>
+                <th class="text-right">应付</th>
+                <th class="text-right">实付</th>
+                <th>付款状态</th>
+                <th>开票</th>
+                <th>上传票</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>丽呈酒店·示例店A</td>
+                <td>UP8A2K91</td>
+                <td>2026-08</td>
+                <td class="text-right">12,000.00</td>
+                <td class="text-right">0.00</td>
+                <td class="text-right">12,000.00</td>
+                <td><span class="tag tag-orange">未结清</span></td>
+                <td class="text-right">2,000.00</td>
+                <td class="text-right">0.00</td>
+                <td class="text-right">2,000.00</td>
+                <td><span class="tag tag-orange">未结清</span></td>
+                <td class="text-right">2,000.00</td>
+                <td class="text-right">0.00</td>
+                <td><span class="tag tag-default">未付款</span></td>
+                <td><span class="tag tag-default">—</span></td>
+                <td><span class="tag tag-orange">待上传</span></td>
+                <td><a class="btn-link" href="javascript:;" onclick="toast('酒店费用明细（原型）')">详情</a></td>
+              </tr>
+              <tr>
+                <td>丽呈酒店·示例店B</td>
+                <td>UP3B7M22</td>
+                <td>2026-08</td>
+                <td class="text-right">8,500.00</td>
+                <td class="text-right">8,500.00</td>
+                <td class="text-right">0.00</td>
+                <td><span class="tag tag-green">已结清</span></td>
+                <td class="text-right">1,500.00</td>
+                <td class="text-right">0.00</td>
+                <td class="text-right">1,500.00</td>
+                <td><span class="tag tag-orange">未结清</span></td>
+                <td class="text-right">1,500.00</td>
+                <td class="text-right">0.00</td>
+                <td><span class="tag tag-default">未付款</span></td>
+                <td><span class="tag tag-default">—</span></td>
+                <td><span class="tag tag-orange">待上传</span></td>
+                <td><a class="btn-link" href="javascript:;" onclick="toast('酒店费用明细（原型）')">详情</a></td>
+              </tr>
+              <tr>
+                <td>丽呈酒店·示例店C</td>
+                <td>UP9C1D55</td>
+                <td>2026-08</td>
+                <td class="text-right">5,200.00</td>
+                <td class="text-right">0.00</td>
+                <td class="text-right">5,200.00</td>
+                <td><span class="tag tag-orange">未结清</span></td>
+                <td class="text-right">1,000.00</td>
+                <td class="text-right">0.00</td>
+                <td class="text-right">1,000.00</td>
+                <td><span class="tag tag-orange">未结清</span></td>
+                <td class="text-right">1,000.00</td>
+                <td class="text-right">0.00</td>
+                <td><span class="tag tag-default">未付款</span></td>
+                <td><span class="tag tag-default">—</span></td>
+                <td><span class="tag tag-orange">待上传</span></td>
+                <td><a class="btn-link" href="javascript:;" onclick="toast('酒店费用明细（原型）')">详情</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span style="font-size:12px;color:var(--text-muted);margin-right:8px">共 3 条 · 「丽呈应收」合计 = 结算账单应付 4,500.00</span>
+            <button class="page-btn active">1</button>
+          </div>
+        </div>
+
+        <div class="phase2-note" style="margin-top:12px">
+          <strong>相对现网的变化：</strong>
+          ① 去掉「扣除佣金应收后付」等轧差付款规则列；收付款在结算账单上由丽呈统一登记。<br>
+          ② 「丽呈应收合作集团」汇总进月度周期性结算账单，作为集团侧「应付」及上传发票依据。<br>
+          ③ 「合作集团应收酒店」仍保留（集团与酒店关系），一期以查看为主，二期可与集团看板「与酒店结算」打通。<br>
+          ④ 集团视角隐藏「发起付款」，仅保留详情查看；丽呈在结算账单详情操作收款。
+        </div>
+
+        <div class="footer-actions" id="footerActions"></div>
+      </main>
+    </div>
+  </div>
+  <script src="js/settlement.js"></script>
+  <script>
+    const view = new URLSearchParams(location.search).get('view') || 'lcc';
+    const period = new URLSearchParams(location.search).get('period') || '2026-08';
+    const isGroup = view === 'group';
+
+    document.getElementById('backLink').href = `settlement-bill-detail.html?type=periodic&scenario=${isGroup ? 'invoice' : 'pay'}`;
+    document.getElementById('billLink').href = `settlement-bill-detail.html?type=periodic&scenario=${isGroup ? 'invoice' : 'pay'}`;
+    document.getElementById('billLink').textContent = `BILL-GA-PD-${period.replace('-', '')}`;
+
+    document.getElementById('sidebar').innerHTML = isGroup ? `
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">结算中心</div>
+        <a class="nav-sub-item" href="settlement-home.html">结算首页</a>
+        <a class="nav-sub-item active" href="settlement-bill-list.html?type=periodic">我的账单</a>
+        <a class="nav-sub-item" href="commission-bill-list.html?view=group">佣金账单明细</a>
+      </nav>
+    ` : `
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">丽呈财务</div>
+        <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
+        <a class="nav-sub-item active" href="lcc-bill-list.html?type=periodic">账单管理</a>
+        <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+      </nav>
+    `;
+
+    document.getElementById('headerRole').innerHTML = isGroup ? '<option>合作集团A</option>' : '<option>Business</option>';
+    document.getElementById('avatar').textContent = isGroup ? '张' : '马';
+    document.getElementById('userName').textContent = isGroup ? '张财务 · 合作集团A' : '马敏 · 丽呈财务';
+    if (isGroup) document.getElementById('groupFilter').style.display = 'none';
+
+    document.getElementById('integrateNote').innerHTML = isGroup
+      ? `<strong>融入方式（合作集团视角）：</strong>本页是月度「周期性费用结算账单」的酒店维度下钻。核对「丽呈应收合作集团」列即可对应账单应付；收付款只读；可返回账单申请开票 / 上传发票。`
+      : `<strong>融入方式（丽呈视角）：</strong>沿用现网「合作集团查询 · 周期性费用」能力作为费项明细。月汇总推送进结算账单后，在此查酒店维度；发起收款请到结算账单，勿再按轧差规则在此付款。`;
+
+    document.getElementById('footerActions').innerHTML = isGroup
+      ? `<a class="btn btn-default" href="settlement-bill-detail.html?type=periodic&scenario=invoice">返回结算账单</a>
+         <a class="btn btn-primary" href="settlement-bill-detail.html?type=periodic&scenario=upload">去上传应付发票</a>`
+      : `<a class="btn btn-default" href="settlement-bill-detail.html?type=periodic&scenario=pay">返回结算账单</a>
+         <a class="btn btn-primary" href="lcc-bill-detail.html?type=periodic&scenario=pay">去登记收款</a>`;
+  </script>
+</body>
+</html>

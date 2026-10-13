@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>账单重新生成 - 内部运维</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+  <style>
+    .op-card { margin-bottom: 12px; }
+    .op-form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 16px 20px;
+    }
+    .op-field { display: flex; flex-direction: column; gap: 6px; }
+    .op-field label { font-size: 12px; color: var(--text-muted); }
+    .op-field input, .op-field select {
+      height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 10px;
+      font-size: 13px;
+      color: var(--text);
+      background: #fff;
+    }
+    .op-field input { width: 280px; }
+    .op-field select { min-width: 160px; }
+    .op-field select.wide { min-width: 240px; }
+    .op-range { display: flex; align-items: center; gap: 8px; }
+    .op-range input { width: 148px; }
+    .op-submit { margin-left: auto; display: flex; gap: 8px; }
+    .match-hint { font-size: 12px; color: var(--text-secondary); margin-top: 10px; min-height: 18px; }
+    .match-hint strong { color: var(--text); font-weight: 500; }
+    .btn.is-busy,
+    .btn.is-busy:hover { opacity: 0.65; cursor: wait; }
+    .log-content { white-space: normal; line-height: 1.6; min-width: 320px; }
+    #logBody td:nth-child(1),
+    #logBody td:nth-child(2),
+    #logBody td:nth-child(4) { white-space: nowrap; }
+    .log-empty { padding: 28px 16px; text-align: center; color: var(--text-muted); font-size: 13px; }
+    .page-btn:disabled { color: #ccc; cursor: not-allowed; background: #fafafa; }
+    #logPages { display: flex; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">内部运维</div>
+        <a class="nav-sub-item active" href="ops-bill-rebuild.html">账单重新生成</a>
+        <div class="nav-group-title">丽呈财务</div>
+        <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
+        <a class="nav-sub-item" href="lcc-bill-list.html">账单管理</a>
+        <a class="nav-sub-item" href="periodic-fee-detail.html?view=lcc&period=2026-08">周期性费用明细</a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索酒店 / 账单"></div>
+        <div class="header-right">
+          <select class="header-select"><option>Business</option></select>
+          <div class="user-info"><div class="user-avatar">运</div><span id="operatorName">内部运维</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <h1 class="page-title">账单重新生成</h1>
+        <p style="font-size:13px;color:var(--text-muted);margin:-4px 0 12px">按酒店、账单类型、费项和账期重新生成并推送。未生成和已生成的账单都可以处理。结果记在下方日志。</p>
+
+        <div class="dash-panel op-card">
+          <div class="dash-panel-header"><h3>操作</h3></div>
+          <div class="op-form">
+            <div class="op-field">
+              <label for="hotelInput">酒店 UPID / 名称</label>
+              <input id="hotelInput" list="hotelList" placeholder="输入 UPID 或酒店名称" value="" autocomplete="off">
+              <datalist id="hotelList"></datalist>
+            </div>
+            <div class="op-field">
+              <label for="billType">账单类型</label>
+              <select id="billType">
+                <option value="">请选择</option>
+                <option value="一次性费用账单">一次性费用账单</option>
+                <option value="周期性费用账单">周期性费用账单</option>
+                <option value="分佣账单">分佣账单</option>
+              </select>
+            </div>
+            <div class="op-field" id="partyField" style="display:none">
+              <label for="partySelect">账单关系</label>
+              <select id="partySelect" class="wide">
+                <option value="">请选择</option>
+                <option value="丽呈-酒店/合作集团账单">丽呈-酒店/合作集团账单</option>
+                <option value="合作集团-酒店账单">合作集团-酒店账单</option>
+              </select>
+            </div>
+            <div class="op-field">
+              <label for="feeSelect">费项</label>
+              <select id="feeSelect"></select>
+            </div>
+            <div class="op-field" id="periodField">
+              <label>账期</label>
+              <div class="op-range">
+                <input type="month" id="startMonth" value="">
+                <span style="color:var(--text-muted)">至</span>
+                <input type="month" id="endMonth" value="">
+              </div>
+            </div>
+            <div class="op-submit">
+              <button class="btn btn-default" id="clearBtn" type="button">清空</button>
+              <button class="btn btn-primary" id="runBtn" type="button">重新生成并推送</button>
+            </div>
+          </div>
+          <div class="match-hint" id="matchHint"></div>
+        </div>
+
+        <div class="dash-panel">
+          <div class="dash-panel-header"><h3>操作日志</h3></div>
+          <div class="table-card" style="border:none;border-radius:0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>操作人</th>
+                  <th>操作内容</th>
+                  <th>执行状态</th>
+                </tr>
+              </thead>
+              <tbody id="logBody"></tbody>
+            </table>
+            <div class="log-empty" id="logEmpty">暂无记录。执行后在这里查看操作内容、操作人和结果。</div>
+            <div class="pagination" id="logPager">
+              <span style="font-size:12px;color:var(--text-muted);margin-right:8px" id="logTotal"></span>
+              <button class="page-btn" id="logPrev" type="button">‹</button>
+              <span id="logPages"></span>
+              <button class="page-btn" id="logNext" type="button">›</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/settlement.js"></script>
+  <script>
+    const OPERATOR = '内部运维';
+    const HOTELS = [
+      { upid: 'UP88421', name: '丽呈酒店·西湖店' },
+      { upid: 'UP8A2K91', name: '丽呈酒店·示例店A' },
+      { upid: 'UP3B7M22', name: '丽呈酒店·示例店B' },
+      { upid: 'UP9C1D55', name: '丽呈酒店·示例店C' }
+    ];
+    const PAGE_SIZE = 10;
+    const logs = [];
+    let page = 1;
+    let running = false;
+
+    const $ = (id) => document.getElementById(id);
+
+    $('hotelList').innerHTML = HOTELS.map((h) =>
+      `<option value="${h.upid}">${h.name}</option><option value="${h.name}">${h.upid}</option>`
+    ).join('');
+
+    function findHotel(raw) {
+      const text = raw.trim();
+      if (!text) return { error: '请输入酒店 UPID 或酒店名称' };
+      const upidHit = HOTELS.filter((h) => h.upid.toLowerCase() === text.toLowerCase());
+      if (upidHit.length === 1) return { hotel: upidHit[0] };
+      const nameHit = HOTELS.filter((h) => h.name === text || h.name.includes(text));
+      if (nameHit.length === 1) return { hotel: nameHit[0] };
+      if (nameHit.length > 1) return { error: '匹配到多家酒店，请输入 UPID' };
+      return { error: '未找到酒店「' + text + '」' };
+    }
+
+    function monthsBetween(start, end) {
+      const [sy, sm] = start.split('-').map(Number);
+      const [ey, em] = end.split('-').map(Number);
+      const out = [];
+      let y = sy;
+      let m = sm;
+      while (y < ey || (y === ey && m <= em)) {
+        out.push(y + '-' + String(m).padStart(2, '0'));
+        m += 1;
+        if (m > 12) { m = 1; y += 1; }
+        if (out.length > 60) break;
+      }
+      return out;
+    }
+
+    function formatTime(d) {
+      const p = (n) => String(n).padStart(2, '0');
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+        + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+    }
+
+    function stamp() {
+      return formatTime(new Date());
+    }
+
+    function seedLogs() {
+      const samples = [
+        { ok: true, hotel: '丽呈酒店·西湖店（UP88421）', fee: '系统维护费', start: '2024-11', end: '2026-08', type: '周期性费用账单', party: '丽呈-酒店/合作集团账单', extra: '已生成并推送 22 个月。' },
+        { ok: true, hotel: '丽呈酒店·示例店A（UP8A2K91）', fee: '品牌使用费', start: '', end: '', type: '一次性费用账单', party: '合作集团-酒店账单', extra: '已重新生成并推送。' },
+        { ok: false, hotel: '不存在的店', fee: '系统维护费', start: '2025-01', end: '2025-03', type: '周期性费用账单', party: '丽呈-酒店/合作集团账单', extra: '未找到酒店「不存在的店」。' },
+        { ok: true, hotel: '丽呈酒店·示例店B（UP3B7M22）', fee: '产品线费用', start: '2026-03', end: '2026-03', type: '分佣账单', party: '', extra: '已生成并推送 1 个月。' },
+        { ok: false, hotel: '丽呈酒店·示例店C（UP9C1D55）', fee: '系统维护费', start: '2026-08', end: '2026-01', type: '周期性费用账单', party: '丽呈-酒店/合作集团账单', extra: '结束月份要晚于开始月份。' }
+      ];
+      for (let i = 0; i < 23; i++) {
+        const s = samples[i % samples.length];
+        const t = new Date(2026, 9, 9, 18, 12, 6);
+        t.setMinutes(t.getMinutes() - i * 47);
+        logs.push({
+          time: formatTime(t),
+          operator: OPERATOR,
+          ok: s.ok,
+          content: '重新生成并推送。酒店：' + s.hotel + '，' + billText(s.type, s.party) + '，费项：' + s.fee + (s.type === '一次性费用账单' ? '' : '，账期：' + s.start + ' 至 ' + s.end) + '。' + s.extra
+        });
+      }
+    }
+
+    function renderMatch() {
+      const found = findHotel($('hotelInput').value);
+      if (! $('hotelInput').value.trim()) {
+        $('matchHint').textContent = '只处理填写的这一家酒店。';
+        return;
+      }
+      if (found.hotel) {
+        $('matchHint').innerHTML = '已匹配：<strong>' + found.hotel.name + '</strong> · ' + found.hotel.upid;
+      } else {
+        $('matchHint').textContent = found.error;
+      }
+    }
+
+    function pageCount() {
+      return Math.max(1, Math.ceil(logs.length / PAGE_SIZE));
+    }
+
+    function renderLogs() {
+      const pages = pageCount();
+      if (page > pages) page = pages;
+      if (page < 1) page = 1;
+      const slice = logs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+      $('logEmpty').style.display = logs.length ? 'none' : 'block';
+      $('logPager').style.display = logs.length ? 'flex' : 'none';
+      $('logBody').innerHTML = slice.map((row) => `
+        <tr>
+          <td>${row.time}</td>
+          <td>${row.operator}</td>
+          <td class="log-content">${row.content}</td>
+          <td>${row.ok
+            ? '<span class="tag tag-green">成功</span>'
+            : '<span class="tag tag-red">失败</span>'}</td>
+        </tr>`).join('');
+      $('logTotal').textContent = '共 ' + logs.length + ' 条';
+      $('logPrev').disabled = page <= 1;
+      $('logNext').disabled = page >= pages;
+      $('logPages').innerHTML = Array.from({ length: pages }, (_, i) => i + 1).map((n) =>
+        `<button class="page-btn${n === page ? ' active' : ''}" type="button" data-page="${n}">${n}</button>`
+      ).join('');
+    }
+
+    function addLog(ok, content) {
+      logs.unshift({ time: stamp(), operator: OPERATOR, content, ok });
+      page = 1;
+      renderLogs();
+    }
+
+    function needsParty(type) {
+      return type === '一次性费用账单' || type === '周期性费用账单';
+    }
+
+    function billText(type, party) {
+      if (!type) return '账单类型：未选择';
+      if (!needsParty(type)) return '账单类型：' + type;
+      return '账单类型：' + type + '，账单关系：' + (party || '未选择');
+    }
+
+    const FEE_OPTIONS = {
+      commission: ['全部', '品牌使用费', '品牌技术服务费', '工程咨询费', '奖励管理费', '产品线费用', '设计费'],
+      periodicLcc: ['品牌技术服务费', '市场营销费', 'ROM派驻费', '委托管理服务费', '系统维护费'],
+      onetime: ['品牌使用费', '工程咨询费', '奖励管理费', '系统安装费', '设计费', '工程技术服务费'],
+      periodicGroup: ['品牌使用费', '系统安装费', '工程咨询费', '设计费', '开店培训费', '前期服务费', '品牌技术服务费', '系统维护费', '市场营销费', '人工服务费']
+    };
+
+    function currentFees() {
+      const type = $('billType').value;
+      if (type === '分佣账单') return FEE_OPTIONS.commission;
+      if (type === '一次性费用账单') return FEE_OPTIONS.onetime;
+      if ($('partySelect').value === '合作集团-酒店账单') return FEE_OPTIONS.periodicGroup;
+      return FEE_OPTIONS.periodicLcc;
+    }
+
+    function syncFees() {
+      const type = $('billType').value;
+      const party = $('partySelect').value;
+      const ready = type === '分佣账单' || type === '一次性费用账单' || (type === '周期性费用账单' && party);
+      const fees = ready ? currentFees() : [];
+      const prev = $('feeSelect').value;
+      $('feeSelect').innerHTML = '<option value="">请选择</option>' + fees.map((fee) => `<option value="${fee}">${fee}</option>`).join('');
+      $('feeSelect').value = fees.indexOf(prev) >= 0 ? prev : '';
+    }
+
+    function clearForm() {
+      $('hotelInput').value = '';
+      $('billType').value = '';
+      $('partySelect').value = '';
+      $('startMonth').value = '';
+      $('endMonth').value = '';
+      syncParty();
+      renderMatch();
+    }
+
+    function syncParty() {
+      const type = $('billType').value;
+      $('partyField').style.display = needsParty(type) ? '' : 'none';
+      $('periodField').style.display = type === '一次性费用账单' ? 'none' : '';
+      syncFees();
+    }
+
+    function scopeText(hotelText, fee, start, end, type, party) {
+      const who = hotelText ? ('酒店：' + hotelText) : '酒店：未填写';
+      const feeText = fee ? ('费项：' + fee) : '费项：未选择';
+      const period = type === '一次性费用账单'
+        ? ''
+        : ('，' + ((start && end) ? ('账期：' + start + ' 至 ' + end) : '账期：未填写'));
+      return who + '，' + billText(type, party) + '，' + feeText + period;
+    }
+
+    function run() {
+      if (running) return;
+      const hotelText = $('hotelInput').value.trim();
+      const fee = $('feeSelect').value;
+      const start = $('startMonth').value;
+      const end = $('endMonth').value;
+      const billType = $('billType').value;
+      const party = needsParty(billType) ? $('partySelect').value : '';
+      const found = findHotel(hotelText);
+      const base = scopeText(
+        found.hotel ? found.hotel.name + '（' + found.hotel.upid + '）' : hotelText,
+        fee,
+        start,
+        end,
+        billType,
+        party
+      );
+
+      const onetime = billType === '一次性费用账单';
+      let error = '';
+      if (!billType) error = '请选择账单类型';
+      else if (needsParty(billType) && !party) error = '请选择账单关系';
+      else if (!found.hotel) error = found.error;
+      else if (!fee) error = '请选择费项';
+      else if (!onetime && (!start || !end)) error = '请选择账期';
+      else if (!onetime && end < start) error = '结束月份要晚于开始月份';
+      else if (!onetime && monthsBetween(start, end).length > 36) error = '一次最多处理 36 个月';
+
+      if (error) {
+        addLog(false, '重新生成并推送。' + base + '。' + error + '。');
+        toast('执行失败');
+        return;
+      }
+
+      running = true;
+      const btn = $('runBtn');
+      btn.classList.add('is-busy');
+      btn.textContent = '执行中';
+      const months = onetime ? [] : monthsBetween(start, end);
+      window.setTimeout(() => {
+        const done = onetime ? '已重新生成并推送。' : ('已生成并推送 ' + months.length + ' 个月。');
+        addLog(true, '重新生成并推送。' + base + '。' + done);
+        running = false;
+        btn.classList.remove('is-busy');
+        btn.textContent = '重新生成并推送';
+        toast('执行成功');
+      }, 700);
+    }
+
+    $('hotelInput').addEventListener('input', renderMatch);
+    $('billType').addEventListener('change', () => {
+      if (!needsParty($('billType').value)) $('partySelect').value = '';
+      syncParty();
+    });
+    $('partySelect').addEventListener('change', syncFees);
+    $('clearBtn').addEventListener('click', clearForm);
+    $('runBtn').addEventListener('click', run);
+    $('logPrev').addEventListener('click', () => {
+      if (page > 1) { page -= 1; renderLogs(); }
+    });
+    $('logNext').addEventListener('click', () => {
+      if (page < pageCount()) { page += 1; renderLogs(); }
+    });
+    $('logPager').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-page]');
+      if (!btn) return;
+      page = Number(btn.dataset.page);
+      renderLogs();
+    });
+    renderMatch();
+    syncParty();
+    seedLogs();
+    renderLogs();
+  </script>
+</body>
+</html>

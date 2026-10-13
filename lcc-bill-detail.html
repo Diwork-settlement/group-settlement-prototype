@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>账单详情 - 丽呈财务</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">丽呈财务</div>
+        <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
+        <a class="nav-sub-item active" href="lcc-bill-list.html">账单管理</a>
+        <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+        <a class="nav-sub-item" href="lcc-invoice-review.html">发票审核</a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select"><option>Business</option></select>
+          <div class="user-info"><div class="user-avatar">马</div><span>马敏 · 丽呈财务</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="detail-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <a href="lcc-bill-list.html" class="btn btn-default btn-sm">← 返回</a>
+            <h1 class="page-title" id="pageTitle">账单详情</h1>
+            <span id="typeTag"></span>
+            <span id="statusTag"></span>
+          </div>
+          <div>
+            <button class="btn btn-default" onclick="toast('已导出')">导出</button>
+          </div>
+        </div>
+
+        <div class="scenario-bar">
+          <span class="sc-label">类型：</span>
+          <a href="?type=commission&scenario=pending">分佣</a>
+          <a href="?type=periodic&scenario=pay">周期性</a>
+          <a href="?type=onetime&scenario=inv_review">一次性</a>
+          <span class="sc-label" style="margin-left:12px">场景：</span>
+          <a id="lPending" href="#">待对账</a>
+          <a id="lDispute" href="#">有异议</a>
+          <a id="lPay" href="#">登记收付款</a>
+          <a id="lInv" href="#">审上传发票</a>
+          <a id="lOk" href="#">已确认</a>
+        </div>
+
+        <div id="statusBanner"></div>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-card-title">账单信息</div>
+            <div class="info-row"><span class="info-label">账单编号</span><span class="info-value" id="billNo">—</span></div>
+            <div class="info-row"><span class="info-label">合作集团</span><span class="info-value">合作集团A</span></div>
+            <div class="info-row"><span class="info-label">账单类型</span><span class="info-value" id="billType">—</span></div>
+            <div class="info-row"><span class="info-label">账期</span><span class="info-value">2026-08</span></div>
+            <div class="info-row"><span class="info-label">推送规则</span><span class="info-value" id="pushRule">—</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">收付进度（本端操作）</div>
+            <div class="info-row"><span class="info-label">收款状态</span><span class="info-value" id="recvStatus">—</span></div>
+            <div class="info-row"><span class="info-label">付款状态</span><span class="info-value" id="payStatus">—</span></div>
+            <div class="info-row"><span class="info-label">开票/发票</span><span class="info-value" id="invStatus">—</span></div>
+            <div class="info-row"><span class="info-label">发票类目</span><span class="info-value" id="invCat">—</span></div>
+          </div>
+        </div>
+
+        <div class="money-strip" id="moneyStrip"></div>
+
+        <div class="fee-group" id="feeGroup"></div>
+
+        <div class="form-card" id="actionPanel" style="display:none"></div>
+
+        <div class="form-card">
+          <div class="form-section-title">操作记录</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="footer-actions" id="footerActions"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 登记收款 -->
+  <div class="modal-overlay" id="recvModal">
+    <div class="modal" style="width:480px">
+      <div class="modal-header">
+        <div class="modal-title">登记收款</div>
+        <button class="modal-close" onclick="closeModal('recvModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">登记合作集团向丽呈支付的款项（集团应付）。一期手工登记，OA 付款直连二期。</p>
+        <div class="form-grid">
+          <div class="form-item"><label><span class="req">*</span>收款金额</label><input type="text" id="recvAmt" value="4,500.00"></div>
+          <div class="form-item"><label><span class="req">*</span>到账日期</label><input type="text" value="2026-09-12"></div>
+          <div class="form-item full"><label>备注</label><input type="text" placeholder="银行流水号等"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" onclick="closeModal('recvModal')">取消</button>
+        <button class="btn btn-primary" onclick="closeModal('recvModal');toast('收款已登记');location.href=location.pathname+'?type='+type+'&scenario=confirmed'">确认登记</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 登记付款 -->
+  <div class="modal-overlay" id="payModal">
+    <div class="modal" style="width:480px">
+      <div class="modal-header">
+        <div class="modal-title">登记付款</div>
+        <button class="modal-close" onclick="closeModal('payModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">登记丽呈向合作集团支付的款项（丽呈应付）。提现账户只读引用合同数据。</p>
+        <div class="form-grid">
+          <div class="form-item"><label><span class="req">*</span>付款金额</label><input type="text" value="19,500.00"></div>
+          <div class="form-item"><label><span class="req">*</span>付款日期</label><input type="text" value="2026-09-12"></div>
+          <div class="form-item full"><label>收款账户</label><input type="text" value="工行 ****6789（合同录入 · 只读）" disabled></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" onclick="closeModal('payModal')">取消</button>
+        <button class="btn btn-primary" onclick="closeModal('payModal');toast('付款已登记');location.href=location.pathname+'?type='+type+'&scenario=confirmed'">确认登记</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/settlement.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const type = params.get('type') || 'commission';
+    let scenario = params.get('scenario') || 'pending';
+
+    const typeMeta = {
+      commission: {
+        name: '分佣 / 分成', tag: 'tag-purple', no: 'BILL-GA-CM-202608',
+        push: '约每月 10 号推送（可配置）', cat: '信息技术服务费',
+        recv: '19,500.00', pay: '23,700.00', got: '0.00', gave: '0.00',
+        fees: [
+          ['客房订单分佣', '联盟小程序', '应收(集团应付)', '20,500.00'],
+          ['商城订单分成', '联盟商城', '应收(集团应付)', '3,200.00'],
+          ['客房订单分佣', '丽呈平台', '应付(丽呈应付)', '15,000.00'],
+          ['商城订单分成', '丽呈平台商城', '应付(丽呈应付)', '4,500.00'],
+        ]
+      },
+      periodic: {
+        name: '周期性费用', tag: 'tag-blue', no: 'BILL-GA-PD-202608',
+        push: '每月 6 号推送（沿用现网）', cat: '待确认',
+        recv: '0.00', pay: '4,500.00', got: '0.00', gave: '0.00',
+        // note: for Licheng, 应收 = group pays them. periodic is group pays Licheng so recv from Licheng view = 4,500
+        // Fix: In Licheng perspective:
+        // 应收 = money Licheng should receive from group = group's payable
+        // 应付 = money Licheng should pay to group = group's receivable
+        fees: [
+          ['品牌技术服务费', '月度', '应收(集团应付)', '2,000.00'],
+          ['系统维护费', '月度', '应收(集团应付)', '1,500.00'],
+          ['市场营销费', '月度', '应收(集团应付)', '1,000.00'],
+        ]
+      },
+      onetime: {
+        name: '一次性费用', tag: 'tag-orange', no: 'BILL-GA-OT-202608',
+        push: '合同触发后推送', cat: '待确认',
+        recv: '0.00', pay: '15,000.00', got: '0.00', gave: '15,000.00',
+        fees: [
+          ['品牌使用费', '酒店A', '应收(集团应付)', '5,000.00'],
+          ['系统安装费', '酒店B', '应收(集团应付)', '10,000.00'],
+        ]
+      },
+    };
+
+    // Licheng money view: flip labels for clarity in strip
+    // Group's 应收 = Licheng 应付; Group's 应付 = Licheng 应收
+    function lccMoney(tm) {
+      // tm.recv in group meta was group's receivable (= Licheng payable)
+      // tm.pay was group's payable (= Licheng receivable)
+      // For periodic/onetime I used group perspective in typeMeta incorrectly for periodic.
+      // commission: recv=19500 group应收=lcc应付, pay=23700 group应付=lcc应收 ✓
+      // periodic: I set recv=0 pay=4500 in group terms - for Licheng strip: 应收=4500 应付=0
+      // onetime: recv=0 pay=15000 → Licheng 应收=15000
+      return {
+        receivable: tm.pay, // Licheng应收 = 集团应付
+        payable: tm.recv,   // Licheng应付 = 集团应收
+        received: tm.gave,  // 实收 = 集团已付
+        paid: tm.got,       // 实付 = 丽呈已付集团
+      };
+    }
+
+    const tm = typeMeta[type];
+    const m = lccMoney(tm);
+
+    // Fix periodic/onetime money in typeMeta for lccMoney - already works if recv/pay are group-perspective
+
+    document.getElementById('pageTitle').textContent = tm.name + '账单';
+    document.getElementById('typeTag').innerHTML = `<span class="tag ${tm.tag}">${tm.name}</span>`;
+    document.getElementById('billNo').textContent = tm.no;
+    document.getElementById('billType').textContent = tm.name + '（独立账单，不与其他类型合并推送）';
+    document.getElementById('pushRule').textContent = tm.push;
+    document.getElementById('invCat').textContent = tm.cat;
+
+    document.getElementById('lPending').href = `?type=${type}&scenario=pending`;
+    document.getElementById('lDispute').href = `?type=${type}&scenario=dispute`;
+    document.getElementById('lPay').href = `?type=${type}&scenario=pay`;
+    document.getElementById('lInv').href = `?type=${type}&scenario=inv_review`;
+    document.getElementById('lOk').href = `?type=${type}&scenario=confirmed`;
+
+    const banners = {
+      pending: ['pending', '账单已推送，等待合作集团对账。'],
+      dispute: ['danger', '合作集团已按订单/账期提出异议，请核实后调整或维持原金额并重新推送。一期暂不支持批量调整。'],
+      pay: ['info', '对账已完成。请在本端登记收款/付款（合作集团侧只读查看）。'],
+      inv_review: ['pending', '合作集团已上传应付发票，OCR 已识别，请人工校验金额、税号、发票项目。'],
+      reconciled: ['info', '合作集团已对账，可开票或登记收付款。'],
+      confirmed: ['success', '本账单流程已完成。'],
+    };
+    const b = banners[scenario] || banners.pending;
+    document.getElementById('statusBanner').innerHTML = `<div class="status-banner ${b[0]}"><span>●</span><div>${b[1]}</div></div>`;
+
+    const tagMap = {
+      pending: ['tag-orange', '待对账'],
+      dispute: ['tag-red', '有异议'],
+      pay: ['tag-blue', '待收付款'],
+      inv_review: ['tag-orange', '待审发票'],
+      reconciled: ['tag-blue', '已对账'],
+      confirmed: ['tag-green', '已确认'],
+    };
+    const tg = tagMap[scenario] || tagMap.pending;
+    document.getElementById('statusTag').innerHTML = `<span class="tag ${tg[0]}">${tg[1]}</span>`;
+
+    document.getElementById('moneyStrip').innerHTML = `
+      <div class="ms-item"><div class="ms-label">应收（集团→丽呈）</div><div class="ms-value recv">¥ ${m.receivable}</div></div>
+      <div class="ms-item"><div class="ms-label">应付（丽呈→集团）</div><div class="ms-value pay">¥ ${m.payable}</div></div>
+      <div class="ms-item"><div class="ms-label">实收</div><div class="ms-value got">¥ ${m.received}</div></div>
+      <div class="ms-item"><div class="ms-label">实付</div><div class="ms-value gave">¥ ${m.paid}</div></div>
+    `;
+
+    document.getElementById('recvStatus').innerHTML = m.received === '0.00' || m.received === '0' ? '<span class="tag tag-default">未收款</span>' : '<span class="tag tag-green">已收款</span>';
+    document.getElementById('payStatus').innerHTML = m.paid === '0.00' || m.paid === '0' ? '<span class="tag tag-default">未付款</span>' : '<span class="tag tag-green">已付款</span>';
+    document.getElementById('invStatus').innerHTML =
+      scenario === 'inv_review' ? '<span class="tag tag-red">待审上传票</span>' :
+      scenario === 'pay' || scenario === 'confirmed' ? '<span class="tag tag-green">已开票/已处理</span>' :
+      '<span class="tag tag-default">—</span>';
+
+    document.getElementById('feeGroup').innerHTML = `
+      <div class="fee-group-header" onclick="toggleFeeGroup(this)">
+        <span class="fg-title"><span class="fg-chevron">▾</span> ${tm.name}明细</span>
+        <span class="fg-total">不做轧差 · 分项展示</span>
+      </div>
+      <div class="fee-group-body">
+        <table class="data-table">
+          <thead><tr><th>费用项</th><th>说明</th><th>方向</th><th class="text-right">金额</th><th>操作</th></tr></thead>
+          <tbody>
+            ${tm.fees.map(f => `
+              <tr>
+                <td>${f[0]}</td><td>${f[1]}</td>
+                <td><span class="fee-dir-tag ${f[2].includes('应付')&&!f[2].includes('集团应付')?'to-group':'to-lcc'}">${f[2]}</span></td>
+                <td class="text-right">${f[3]}</td>
+                <td><a class="btn-link" href="commission-bill-detail.html?view=lcc&period=2026-08">查看明细 →</a></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    const panel = document.getElementById('actionPanel');
+    if (scenario === 'dispute') {
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div class="form-section-title">异议处理</div>
+        <div class="status-banner danger" style="margin-bottom:12px"><span>!</span><div>异议：订单 ORD-8821 分佣比例与合同不符（按订单维度）。</div></div>
+        <div class="form-grid">
+          <div class="form-item"><label>处理方式</label>
+            <div class="radio-group">
+              <label><input type="radio" name="h" checked> 调整金额</label>
+              <label><input type="radio" name="h"> 维持原金额</label>
+            </div>
+          </div>
+          <div class="form-item"><label>调整金额</label><input type="text" value="-500.00"></div>
+          <div class="form-item full"><label>说明</label><textarea>核实后调整，重新推送该类型账单。</textarea></div>
+        </div>
+      `;
+    } else if (scenario === 'inv_review') {
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div class="form-section-title">上传发票校验（OCR）</div>
+        <div class="ocr-box">
+          <div class="ocr-title">OCR 识别结果</div>
+          <div class="ocr-row">
+            <span>发票号 <strong>31009876543210</strong></span>
+            <span>金额 <strong>¥ 15,000.00</strong></span>
+            <span>税号 <strong>91310000MA1KXXXXXX</strong></span>
+            <span>项目 <strong>信息技术服务费</strong></span>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">与现有酒店发票审核合并同一能力；校验不通过直接驳回。</p>
+      `;
+    } else if (scenario === 'pay') {
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div class="form-section-title">收付款登记</div>
+        <p style="font-size:13px;color:var(--text-secondary)">应收 ¥ ${m.receivable}（登记收款）　应付 ¥ ${m.payable}（登记付款）　不做轧差，可分别登记。</p>
+      `;
+    }
+
+    document.getElementById('timeline').innerHTML = `
+      <div class="timeline-item"><div class="tl-time">推送日</div><div class="tl-action">系统按类型推送账单</div><div class="tl-reason">${tm.push}</div></div>
+      <div class="timeline-item"><div class="tl-time">生成日</div><div class="tl-action">系统生成 ${tm.name} 账单</div></div>
+    `;
+
+    const footer = document.getElementById('footerActions');
+    if (scenario === 'dispute') {
+      footer.innerHTML = `
+        <button class="btn btn-default" onclick="toast('已维持并重新推送')">维持原金额并推送</button>
+        <button class="btn btn-primary" onclick="toast('已调整并重新推送')">调整后重新推送</button>
+      `;
+    } else if (scenario === 'pay') {
+      footer.innerHTML = `
+        <button class="btn btn-default" onclick="openModal('payModal')" ${m.payable==='0.00'?'disabled':''}>登记付款（付集团）</button>
+        <button class="btn btn-primary" onclick="document.getElementById('recvAmt').value='${m.receivable}';openModal('recvModal')" ${m.receivable==='0.00'?'disabled':''}>登记收款（收集团）</button>
+      `;
+    } else if (scenario === 'inv_review') {
+      footer.innerHTML = `
+        <button class="btn btn-default" onclick="toast('已驳回，通知合作集团重新上传')">驳回</button>
+        <button class="btn btn-primary" onclick="toast('发票校验通过');location.href='?type='+type+'&scenario=confirmed'">校验通过</button>
+      `;
+    } else if (scenario === 'pending') {
+      footer.innerHTML = `<button class="btn btn-default" onclick="toast('已催对账')">催对账</button>`;
+    } else {
+      footer.innerHTML = `<span style="color:var(--text-muted);font-size:13px;margin-right:auto">当前状态</span>`;
+    }
+  </script>
+</body>
+</html>

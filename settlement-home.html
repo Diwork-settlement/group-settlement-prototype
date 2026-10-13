@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>结算首页 - 合作集团线上结算</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-logo">合作集团结算</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">结算中心</div>
+        <a class="nav-sub-item active" href="settlement-home.html">结算首页</a>
+        <a class="nav-sub-item" href="settlement-bill-list.html">我的账单</a>
+        <a class="nav-sub-item" href="commission-bill-list.html?view=group">佣金账单明细</a>
+        <div class="nav-group-title">账户信息</div>
+        <a class="nav-sub-item" href="withdraw-account.html">提现账户</a>
+        <a class="nav-sub-item" href="invoice-account.html">发票信息</a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select"><option>合作集团A</option></select>
+          <div class="user-info"><div class="user-avatar">张</div><span>张财务 · 合作集团A</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="detail-header">
+          <div>
+            <h1 class="page-title">结算首页</h1>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:4px">合作集团A · 按账期范围合计与丽呈的应收应付 / 实收实付 / 发票（分账推送，不做轧差）</p>
+          </div>
+        </div>
+
+        <div class="period-bar">
+          <span class="period-label">数据账期</span>
+          <select id="periodFrom">
+            <option value="2026-06">2026-06</option>
+            <option value="2026-07">2026-07</option>
+            <option value="2026-08" selected>2026-08</option>
+            <option value="2026-09">2026-09</option>
+          </select>
+          <span style="color:var(--text-muted)">至</span>
+          <select id="periodTo">
+            <option value="2026-06">2026-06</option>
+            <option value="2026-07">2026-07</option>
+            <option value="2026-08">2026-08</option>
+            <option value="2026-09" selected>2026-09（当月）</option>
+          </select>
+          <button class="btn btn-primary" onclick="switchPeriod()">查询</button>
+          <button class="btn btn-default" onclick="setCurrentMonth()">当月</button>
+          <span class="period-hint">支持选择账期范围合计；默认当月</span>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <h2>与丽呈结算 <span class="tag tag-blue">一期</span></h2>
+            <span style="font-size:12px;color:var(--text-muted)" id="rangeTip">收付款由丽呈财务操作，本端仅查看进度</span>
+          </div>
+          <div class="overview-grid" id="moneyGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+          <div class="overview-grid" id="invoiceGrid" style="grid-template-columns:repeat(4,1fr);margin-top:12px"></div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <h2>范围内账单</h2>
+            <a href="settlement-bill-list.html" style="font-size:13px">查看全部 →</a>
+          </div>
+          <div class="table-card table-scroll">
+            <table class="data-table" id="billTable">
+              <thead>
+                <tr>
+                  <th>账单编号</th>
+                  <th>账单类型</th>
+                  <th>账期</th>
+                  <th class="text-right">应收</th>
+                  <th class="text-right">应付</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="billTypeGrid"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="dash-panel" style="margin-bottom:16px">
+          <div class="dash-panel-header">
+            <h3>待办事项</h3>
+          </div>
+          <div class="todo-list">
+            <a class="todo-item" href="settlement-bill-detail.html?type=commission&scenario=pending">
+              <div class="todo-icon warn">☰</div>
+              <div class="todo-body">
+                <div class="todo-title">分佣账单待对账</div>
+                <div class="todo-desc">2026-08 分佣分成账单</div>
+              </div>
+              <span class="todo-action">去对账 →</span>
+            </a>
+            <a class="todo-item" href="settlement-bill-detail.html?type=periodic&scenario=invoice">
+              <div class="todo-icon info">✉</div>
+              <div class="todo-body">
+                <div class="todo-title">申请开票</div>
+                <div class="todo-desc">周期性费用有未开票金额，可在账单上申请开票</div>
+              </div>
+              <span class="todo-action">去申请 →</span>
+            </a>
+            <a class="todo-item" href="settlement-bill-detail.html?type=onetime&scenario=upload">
+              <div class="todo-icon urgent">↑</div>
+              <div class="todo-body">
+                <div class="todo-title">上传应付发票</div>
+                <div class="todo-desc">需向丽呈开具的发票，上传后系统 OCR 识别校验</div>
+              </div>
+              <span class="todo-action">去上传 →</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-block-header">
+            <h2>与旗下酒店结算 <span class="phase2-badge">二期规划 · 占位示意</span></h2>
+          </div>
+          <div class="phase2-placeholder">
+            <div class="phase2-desc">未来并列展示「集团 ↔ 丽呈」与「集团 ↔ 旗下酒店」结算，互不混账。本期不可操作。</div>
+            <div class="phase2-grid">
+              <div class="phase2-card"><div class="p2-label">应收酒店</div><div class="p2-value">¥ —,—</div></div>
+              <div class="phase2-card"><div class="p2-label">应付酒店</div><div class="p2-value">¥ —,—</div></div>
+              <div class="phase2-card"><div class="p2-label">酒店对账中</div><div class="p2-value">— 家</div></div>
+              <div class="phase2-card"><div class="p2-label">逾期未结</div><div class="p2-value">— 家</div></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="js/settlement.js"></script>
+  <script>
+    const periodOrder = ['2026-06', '2026-07', '2026-08', '2026-09'];
+    const periodData = {
+      '2026-09': {
+        receivable: 6400, payable: 18200, received: 0, paid: 0,
+        invNeed: 12800, invDone: 0, invUploadNeed: 5000, invUploadDone: 0,
+        bills: [
+          { no: '—', name: '分佣 / 分成', period: '2026-09', recv: '—', pay: '—', status: '生成中', tag: 'tag-default', href: 'settlement-bill-list.html?type=commission' },
+          { no: '—', name: '周期性费用', period: '2026-09', recv: '—', pay: '—', status: '生成中', tag: 'tag-default', href: 'settlement-bill-list.html?type=periodic' },
+        ]
+      },
+      '2026-08': {
+        receivable: 19500, payable: 43200, received: 0, paid: 15000,
+        invNeed: 19500, invDone: 8000, invUploadNeed: 43200, invUploadDone: 20000,
+        bills: [
+          { no: 'BILL-GA-CM-202608', name: '分佣 / 分成', period: '2026-08', recv: '19,500.00', pay: '23,700.00', status: '待对账', tag: 'tag-orange', href: 'settlement-bill-detail.html?type=commission&scenario=pending' },
+          { no: 'BILL-GA-PD-202608', name: '周期性费用', period: '2026-08', recv: '0.00', pay: '4,500.00', status: '已对账', tag: 'tag-blue', href: 'settlement-bill-detail.html?type=periodic&scenario=invoice' },
+          { no: 'BILL-GA-OT-202608', name: '一次性费用', period: '2026-08', recv: '0.00', pay: '15,000.00', status: '待上传发票', tag: 'tag-red', href: 'settlement-bill-detail.html?type=onetime&scenario=upload' },
+        ]
+      },
+      '2026-07': {
+        receivable: 20480, payable: 38900, received: 20480, paid: 38900,
+        invNeed: 20480, invDone: 20480, invUploadNeed: 38900, invUploadDone: 38900,
+        bills: [
+          { no: 'BILL-GA-CM-202607', name: '分佣 / 分成', period: '2026-07', recv: '20,480.00', pay: '18,420.00', status: '有异议', tag: 'tag-red', href: 'settlement-bill-detail.html?type=commission&scenario=dispute' },
+          { no: 'BILL-GA-PD-202607', name: '周期性费用', period: '2026-07', recv: '0.00', pay: '4,500.00', status: '已确认', tag: 'tag-green', href: 'settlement-bill-detail.html?type=periodic&scenario=confirmed' },
+        ]
+      },
+      '2026-06': {
+        receivable: 21050, payable: 52100, received: 21050, paid: 40000,
+        invNeed: 21050, invDone: 21050, invUploadNeed: 52100, invUploadDone: 45000,
+        bills: [
+          { no: 'BILL-GA-CM-202606', name: '分佣 / 分成', period: '2026-06', recv: '21,050.00', pay: '31,050.00', status: '已确认', tag: 'tag-green', href: 'settlement-bill-detail.html?type=commission&scenario=confirmed' },
+          { no: 'BILL-GA-PD-202606', name: '周期性费用', period: '2026-06', recv: '0.00', pay: '4,500.00', status: '已确认', tag: 'tag-green', href: 'settlement-bill-detail.html?type=periodic&scenario=confirmed' },
+          { no: 'BILL-GA-OT-202606', name: '一次性费用', period: '2026-06', recv: '0.00', pay: '16,550.00', status: '部分付款', tag: 'tag-orange', href: 'settlement-bill-detail.html?type=onetime&scenario=confirmed' },
+        ]
+      },
+    };
+
+    function fmt(n) {
+      return n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function periodsInRange(from, to) {
+      let i0 = periodOrder.indexOf(from);
+      let i1 = periodOrder.indexOf(to);
+      if (i0 < 0 || i1 < 0) return [];
+      if (i0 > i1) [i0, i1] = [i1, i0];
+      return periodOrder.slice(i0, i1 + 1);
+    }
+
+    function setCurrentMonth() {
+      document.getElementById('periodFrom').value = '2026-09';
+      document.getElementById('periodTo').value = '2026-09';
+      switchPeriod();
+    }
+
+    function switchPeriod() {
+      let from = document.getElementById('periodFrom').value;
+      let to = document.getElementById('periodTo').value;
+      if (periodOrder.indexOf(from) > periodOrder.indexOf(to)) {
+        [from, to] = [to, from];
+        document.getElementById('periodFrom').value = from;
+        document.getElementById('periodTo').value = to;
+      }
+      const keys = periodsInRange(from, to);
+      const sum = { receivable: 0, payable: 0, received: 0, paid: 0, invNeed: 0, invDone: 0, invUploadNeed: 0, invUploadDone: 0 };
+      const bills = [];
+      keys.forEach(k => {
+        const d = periodData[k];
+        if (!d) return;
+        Object.keys(sum).forEach(f => { sum[f] += d[f]; });
+        (d.bills || []).forEach(b => bills.push(b));
+      });
+      const rangeLabel = from === to ? from : `${from} ~ ${to}`;
+      document.getElementById('rangeTip').textContent = `合计 ${keys.length} 个账期 · 收付款由丽呈操作，本端只读`;
+
+      document.getElementById('moneyGrid').innerHTML = `
+        <div class="overview-card"><div class="ov-label">应收（丽呈应付本集团）</div><div class="ov-value primary">¥ ${fmt(sum.receivable)}</div><div class="ov-sub">${rangeLabel} · 范围合计</div></div>
+        <div class="overview-card"><div class="ov-label">应付（本集团应付丽呈）</div><div class="ov-value">¥ ${fmt(sum.payable)}</div><div class="ov-sub">${rangeLabel} · 范围合计</div></div>
+        <div class="overview-card"><div class="ov-label">实收</div><div class="ov-value success">¥ ${fmt(sum.received)}</div><div class="ov-sub">丽呈已付至本集团 · 只读</div></div>
+        <div class="overview-card"><div class="ov-label">实付</div><div class="ov-value warn">¥ ${fmt(sum.paid)}</div><div class="ov-sub">本集团已付至丽呈 · 只读</div></div>
+      `;
+      document.getElementById('invoiceGrid').innerHTML = `
+        <div class="overview-card"><div class="ov-label">待申请开票金额</div><div class="ov-value warn">¥ ${fmt(sum.invNeed)}</div><div class="ov-sub">丽呈应向本集团开具</div></div>
+        <div class="overview-card"><div class="ov-label">已开票金额</div><div class="ov-value">¥ ${fmt(sum.invDone)}</div><div class="ov-sub">已完成开票</div></div>
+        <div class="overview-card"><div class="ov-label">待上传发票金额</div><div class="ov-value danger">¥ ${fmt(sum.invUploadNeed)}</div><div class="ov-sub">本集团应向丽呈开具</div></div>
+        <div class="overview-card"><div class="ov-label">已上传并通过</div><div class="ov-value success">¥ ${fmt(sum.invUploadDone)}</div><div class="ov-sub">OCR + 人工校验通过</div></div>
+      `;
+      document.getElementById('billTypeGrid').innerHTML = bills.length ? bills.map(b => `
+        <tr>
+          <td>${b.no === '—' ? '—' : `<a href="${b.href}">${b.no}</a>`}</td>
+          <td>${b.name}</td>
+          <td>${b.period}</td>
+          <td class="text-right">${b.recv}</td>
+          <td class="text-right">${b.pay}</td>
+          <td><span class="tag ${b.tag}">${b.status}</span></td>
+          <td><a class="btn-link" href="${b.href}">查看</a></td>
+        </tr>
+      `).join('') : `<tr><td colspan="7" class="empty-state">该账期范围内暂无账单</td></tr>`;
+    }
+
+    setCurrentMonth();
+  </script>
+</body>
+</html>
