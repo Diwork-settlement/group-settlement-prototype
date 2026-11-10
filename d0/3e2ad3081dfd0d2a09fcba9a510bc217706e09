@@ -1,0 +1,31 @@
+lcc-bill-detail.html
+  s_c83ae29a221c05::t_65d57808344fa4 42
+  s_c83ae29a221c05::t_3da31a4f98eba6 24-26
+periodic-fee-detail.html
+  s_c83ae29a221c05::t_d026c53203f4f8 227,230-232
+settlement-bill-detail.html
+  s_c83ae29a221c05::t_5bd6710c3295e1 24-26
+  s_c83ae29a221c05::t_de7729b42e1a8b 42
+index.html
+  s_c83ae29a221c05::t_02be26d31abc6c 6,12-13,15,18-19,21-26,30-31,33-38,42-43,45-48,53,56-57,59-61
+README.md
+  s_c83ae29a221c05::t_967263979dd0f4 1,3,5,7-10,12-14,16
+fee-bill-detail.html
+  s_c83ae29a221c05::t_05c846808222c0 495,497,502-504,508-510
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.52-trip",
+  "base_commit_sha": "d03e2ad3081dfd0d2a09fcba9a510bc217706e09",
+  "prompts": {},
+  "sessions": {
+    "s_c83ae29a221c05": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c68ed09-092d-4138-9a11-5aa27d798a84",
+        "model": "default"
+      },
+      "human_author": "ddxi <ddxi@lpt019775.cn1.global.ctrip.com>"
+    }
+  }
+}
