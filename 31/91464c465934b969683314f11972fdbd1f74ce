@@ -1,0 +1,20 @@
+periodic-fee-detail.html
+  s_c83ae29a221c05::t_bda0eb4b9a5c4c 223-224
+  s_c83ae29a221c05::t_692b062822b9bd 241-243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.52-trip",
+  "base_commit_sha": "3191464c465934b969683314f11972fdbd1f74ce",
+  "prompts": {},
+  "sessions": {
+    "s_c83ae29a221c05": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "0c68ed09-092d-4138-9a11-5aa27d798a84",
+        "model": "default"
+      },
+      "human_author": "ddxi <ddxi@lpt019775.cn1.global.ctrip.com>"
+    }
+  }
+}
