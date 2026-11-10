@@ -492,27 +492,22 @@
     }
 
     function renderChrome() {
-      const back = isGroup
-        ? `settlement-bill-list.html?type=${kind === 'onetime' ? 'onetime' : 'periodic'}`
-        : `lcc-bill-list.html?type=${kind === 'onetime' ? 'onetime' : 'periodic'}`;
-      document.getElementById('backLink').href = back;
+      document.getElementById('backLink').href = 'index.html';
       document.getElementById('pageTitle').textContent = profile.title;
-      document.title = profile.title + ' - 合作集团线上结算';
+      document.title = profile.title + ' - 费用账单原型';
       document.getElementById('kindTag').innerHTML = `<span class="tag ${kind === 'onetime' ? 'tag-orange' : 'tag-blue'}">${profile.biz}</span>`;
       document.getElementById('sidebar').innerHTML = isGroup ? `
         <div class="sidebar-logo">合作集团结算</div>
         <nav class="sidebar-nav">
-          <div class="nav-group-title">结算中心</div>
-          <a class="nav-sub-item" href="settlement-home.html">结算首页</a>
-          <a class="nav-sub-item active" href="settlement-bill-list.html">我的账单</a>
-          <a class="nav-sub-item" href="commission-bill-list.html?view=group">佣金账单明细</a>
+          <div class="nav-group-title">本次原型</div>
+          <a class="nav-sub-item" href="index.html">原型导航</a>
+          <a class="nav-sub-item active" href="fee-bill-detail.html?kind=${kind}&view=group&tab=hotel">费用账单</a>
         </nav>` : `
         <div class="sidebar-logo">合作集团结算</div>
         <nav class="sidebar-nav">
-          <div class="nav-group-title">丽呈财务</div>
-          <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
-          <a class="nav-sub-item active" href="lcc-bill-list.html">账单管理</a>
-          <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+          <div class="nav-group-title">本次原型</div>
+          <a class="nav-sub-item" href="index.html">原型导航</a>
+          <a class="nav-sub-item active" href="fee-bill-detail.html?kind=${kind}&view=lcc&tab=hotel">费用账单</a>
         </nav>`;
       document.getElementById('headerRole').innerHTML = isGroup ? '<option>合作集团A</option>' : '<option>Business</option>';
       document.getElementById('avatar').textContent = isGroup ? '张' : '马';

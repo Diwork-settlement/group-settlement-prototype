@@ -224,21 +224,12 @@
     document.getElementById('billLink').href = `settlement-bill-detail.html?type=periodic&scenario=${isGroup ? 'invoice' : 'pay'}`;
     document.getElementById('billLink').textContent = `BILL-GA-PD-${period.replace('-', '')}`;
 
-    document.getElementById('sidebar').innerHTML = isGroup ? `
+    document.getElementById('sidebar').innerHTML = `
       <div class="sidebar-logo">合作集团结算</div>
       <nav class="sidebar-nav">
-        <div class="nav-group-title">结算中心</div>
-        <a class="nav-sub-item" href="settlement-home.html">结算首页</a>
-        <a class="nav-sub-item active" href="settlement-bill-list.html?type=periodic">我的账单</a>
-        <a class="nav-sub-item" href="commission-bill-list.html?view=group">佣金账单明细</a>
-      </nav>
-    ` : `
-      <div class="sidebar-logo">合作集团结算</div>
-      <nav class="sidebar-nav">
-        <div class="nav-group-title">丽呈财务</div>
-        <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
-        <a class="nav-sub-item active" href="lcc-bill-list.html?type=periodic">账单管理</a>
-        <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+        <div class="nav-group-title">本次原型</div>
+        <a class="nav-sub-item" href="index.html">原型导航</a>
+        <a class="nav-sub-item active" href="periodic-fee-detail.html?view=${isGroup ? 'group' : 'lcc'}&period=${period}">周期性费用明细</a>
       </nav>
     `;
 
