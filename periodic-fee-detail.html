@@ -220,8 +220,8 @@
       const channel = a.dataset.channel || 'mixed';
       a.href = `fee-bill-detail.html?kind=periodic&channel=${channel}&installment=0&view=${isGroup ? 'group' : 'lcc'}`;
     });
-    document.getElementById('backLink').href = `settlement-bill-detail.html?type=periodic&scenario=${isGroup ? 'invoice' : 'pay'}`;
-    document.getElementById('billLink').href = `settlement-bill-detail.html?type=periodic&scenario=${isGroup ? 'invoice' : 'pay'}`;
+    document.getElementById('backLink').href = 'index.html';
+    document.getElementById('billLink').href = `fee-bill-detail.html?kind=periodic&installment=0&view=${isGroup ? 'group' : 'lcc'}&tab=hotel`;
     document.getElementById('billLink').textContent = `BILL-GA-PD-${period.replace('-', '')}`;
 
     document.getElementById('sidebar').innerHTML = `
@@ -238,11 +238,9 @@
     document.getElementById('userName').textContent = isGroup ? '张财务 · 合作集团A' : '马敏 · 丽呈财务';
     if (isGroup) document.getElementById('groupFilter').style.display = 'none';
 
-    document.getElementById('footerActions').innerHTML = isGroup
-      ? `<a class="btn btn-default" href="settlement-bill-detail.html?type=periodic&scenario=invoice">返回结算账单</a>
-         <a class="btn btn-primary" href="settlement-bill-detail.html?type=periodic&scenario=upload">去上传应付发票</a>`
-      : `<a class="btn btn-default" href="settlement-bill-detail.html?type=periodic&scenario=pay">返回结算账单</a>
-         <a class="btn btn-primary" href="lcc-bill-detail.html?type=periodic&scenario=pay">去登记收款</a>`;
+    document.getElementById('footerActions').innerHTML =
+      `<a class="btn btn-default" href="index.html">返回导航</a>
+       <a class="btn btn-primary" href="fee-bill-detail.html?kind=periodic&installment=0&view=${isGroup ? 'group' : 'lcc'}&tab=hotel">打开费用账单</a>`;
   </script>
 </body>
 </html>

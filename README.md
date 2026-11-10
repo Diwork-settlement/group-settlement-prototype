@@ -7,7 +7,6 @@
 - `index.html` — 原型导航
 - `fee-bill-detail.html` — 费用账单详情（主原型）
 - `periodic-fee-detail.html` — 周期性费用酒店明细
-- `settlement-bill-detail.html` / `lcc-bill-detail.html` — 结算账单中的酒店侧金额
 
 ## 线上预览
 
