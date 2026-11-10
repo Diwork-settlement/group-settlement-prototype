@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>费用账单 - 合作集团线上结算</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+  <style>
+    .fb-accent { color: #1890ff; }
+    .legacy-section-title::before,
+    .sheet-title::before { background: #1890ff; }
+    .legacy-kv-table th { width: auto; min-width: 108px; }
+    .fb-tabs {
+      display: flex;
+      gap: 32px;
+      margin: 0;
+      background: #fff;
+      padding: 0 20px;
+      border: 1px solid var(--border);
+      border-bottom: 1px solid #f0f0f0;
+      border-radius: 4px 4px 0 0;
+    }
+    .fb-tabs a {
+      padding: 12px 0 10px;
+      margin-bottom: -1px;
+      font-size: 14px;
+      color: #666;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+    }
+    .fb-tabs a.active {
+      color: #1890ff;
+      font-weight: 500;
+      border-bottom-color: #1890ff;
+    }
+    .fb-tabs a:hover { text-decoration: none; color: #1890ff; }
+    .fee-pills {
+      display: flex;
+      gap: 28px;
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .fee-pills a {
+      padding: 12px 0 8px;
+      margin-bottom: -1px;
+      font-size: 14px;
+      color: #666;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+    }
+    .fee-pills a.active { color: #1890ff; border-bottom-color: #1890ff; }
+    .fee-pills a:hover { color: #1890ff; text-decoration: none; }
+    .stack-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      padding: 2px 2px 0;
+    }
+    #hotelPane, #lccPane {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+    }
+    .scenario-bar a.sc-on {
+      font-weight: 700;
+      text-decoration: none;
+      background: #fff;
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    .sheet-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      padding: 16px 20px 12px 30px;
+      position: relative;
+    }
+    .sheet-title::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 18px;
+      width: 3px;
+      height: 14px;
+      border-radius: 1px;
+    }
+    .sheet-title.sub { font-weight: 600; padding-top: 8px; }
+    .sheet-title.sub::before { top: 10px; }
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 2px 20px 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .metric .mk { font-size: 13px; color: #888; margin-bottom: 6px; }
+    .metric .mv { font-size: 14px; color: #333; }
+    .metric-row.primary .mv { font-size: 16px; font-weight: 600; }
+    .flow {
+      margin: 0 20px 12px;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .flow-hd {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+    .flow-hd .who { color: #1890ff; }
+    .flow-hd .tag { margin-left: auto; font-weight: 500; }
+    .flow .metric-row { border-bottom: none; padding-top: 12px; }
+    .flow .metric-row + .metric-row { padding-top: 4px; border-top: 1px solid #f5f5f5; }
+    .pool-note { padding: 4px 16px 0; font-size: 12px; color: #888; }
+    .formula {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      padding: 12px 16px;
+      border-top: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+    }
+    .formula .k { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+    .formula .v { font-size: 14px; font-weight: 600; color: #333; }
+    .formula .op { color: #bfbfbf; font-size: 18px; line-height: 1; padding-bottom: 2px; }
+    .formula.total { background: #f7fbff; }
+    .formula.total .v.result { color: #1890ff; font-size: 16px; }
+    .formula .v.neg, .formula.total .v.result.neg { color: #ff4d4f; }
+    .ledger-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 20px 20px;
+      background: #f5f6f8;
+    }
+    .ledger {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .ledger-hd {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .ledger.cash .ledger-hd { background: #f3f8ff; }
+    .ledger.crs .ledger-hd { background: #f6f7fb; }
+    .ledger-hd::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      border-radius: 1px;
+      background: #1890ff;
+    }
+    .ledger.crs .ledger-hd::before { background: #597ef7; }
+    .ledger .metric-row { padding-top: 14px; }
+    .meta-line, .remark-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 28px;
+      padding: 12px 20px;
+      font-size: 13px;
+      color: #888;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .meta-line b, .remark-line b { color: #333; font-weight: 400; }
+    .add-link {
+      display: inline-block;
+      margin: 12px 20px 8px;
+      padding: 0;
+      border: none;
+      background: none;
+      color: #1890ff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .add-link:hover { color: #40a9ff; }
+    .sheet-scroll { overflow-x: auto; }
+    .prod-table th {
+      background: #fafafa;
+      color: #666;
+      font-weight: 400;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .prod-table td {
+      font-size: 13px;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .prod-table .empty-state { padding: 28px 16px; color: #bfbfbf; }
+    .neg { color: #ff4d4f; }
+    .cell-input, .cell-select {
+      width: 100%;
+      min-width: 112px;
+      height: 32px;
+      box-sizing: border-box;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      padding: 0 8px;
+      font-size: 13px;
+      color: #333;
+      background: #fff;
+    }
+    .cell-input::placeholder { color: #bfbfbf; }
+    .cell-input:focus, .cell-select:focus {
+      border-color: #1890ff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    }
+    .edit-row td { background: #fff; }
+    .edit-row:hover td { background: #fff; }
+    .row-ops { white-space: nowrap; }
+    .icon-btn {
+      width: 24px;
+      height: 24px;
+      margin-right: 4px;
+      border: none;
+      background: none;
+      color: #1890ff;
+      font-size: 16px;
+      line-height: 24px;
+      cursor: pointer;
+    }
+    .icon-btn.cancel { color: #999; }
+    .icon-btn.cancel:hover { color: #ff4d4f; }
+    .plan-wrap { padding: 4px 0 8px; }
+    @media (max-width: 1100px) {
+      .metric-row { grid-template-columns: 1fr; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select" id="headerRole"></select>
+          <div class="user-info"><div class="user-avatar" id="avatar">马</div><span id="userName">马敏 · 丽呈财务</span></div>
+        </div>
+      </header>
+      <main class="page-content">
+        <div class="detail-header">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <a href="#" class="btn btn-default btn-sm" id="backLink">← 返回</a>
+            <h1 class="page-title" id="pageTitle" style="margin:0">一次性费用</h1>
+            <span id="kindTag"></span>
+          </div>
+        </div>
+
+        <div class="scenario-bar" id="scenarioBar"></div>
+
+        <div class="legacy-detail-wrap" style="padding-bottom:0">
+          <div class="legacy-section-title">基本信息</div>
+          <table class="legacy-kv-table" id="basicInfo"></table>
+        </div>
+
+        <div class="legacy-detail-wrap" id="payoutPane" style="display:none"></div>
+
+        <div class="fb-tabs" id="billTabs"></div>
+        <div id="hotelPane"></div>
+        <div id="lccPane" style="display:none"></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/settlement.js"></script>
+  <script>
+    const TODAY = '2026-10-26';
+    const params = new URLSearchParams(location.search);
+    const kind = params.get('kind') === 'periodic' ? 'periodic' : 'onetime';
+    const channel = ['mixed', 'cash', 'crs'].includes(params.get('channel')) ? params.get('channel') : 'mixed';
+    const installment = params.get('installment') === '1';
+    const tab = params.get('tab') === 'lcc' ? 'lcc' : 'hotel';
+    const isGroup = params.get('view') === 'group';
+    const settled = params.get('settled') === '1';
+    const lccCash = params.get('lcccash') === '1';
+
+    const CRS_ONCE = [
+      { id: '18421', date: '2026-08-25 09:12:06', amt: -3370.50, sn: '1792A488345022556873301', type: 'CRS代扣退回', note: '' },
+      { id: '18390', date: '2026-08-18 06:28:40', amt: 12450.00, sn: '1792535320690125873301', type: 'CRS代扣', note: '' },
+      { id: '18311', date: '2026-08-11 06:21:18', amt: 22680.50, sn: '179253532069254873301', type: 'CRS代扣', note: '' },
+      { id: '18202', date: '2026-08-02 05:40:11', amt: 18240.00, sn: '1792753532082970687301', type: 'CRS代扣', note: '' }
+    ];
+    const CRS_PERIOD = [
+      { id: '11469', date: '2026-10-12 06:25:27', amt: 649.80, sn: '1791757527357226389307', type: 'CRS代扣', note: '' }
+    ];
+    const PAY_TYPES = ['手动抵扣', 'CRS代扣', 'CRS代扣退回'];
+    const INVOICE_TYPES = ['增值税普通发票', '增值税专用发票'];
+
+    const profiles = {
+      onetime: {
+        title: '一次性费用',
+        biz: '商务费用',
+        fee: '品牌使用费',
+        cycle: '一次性',
+        deadline: '2026-12-31',
+        method: '现金收款',
+        share: true,
+        remark: '',
+        rule: '费用抵充完成后，从同一账期的酒店代扣中扣除合作集团对丽呈的应付款，不按费项对应，剩余部分打款给合作集团',
+        withhold: true,
+        amounts: {
+          mixed: { cash: 80000, crs: 120000, cashGot: 20000, crsGot: 50000 },
+          cash: { cash: 80000, crs: 0, cashGot: 20000, crsGot: 0 },
+          crs: { cash: 0, crs: 120000, cashGot: 0, crsGot: 50000 }
+        },
+        plans: {
+          mixed: [
+            { n: 1, due: '2026-06-30', cash: 30000, crs: 50000, method: '现金收款', cashGot: 20000, crsGot: 50000 },
+            { n: 2, due: '2026-09-30', cash: 30000, crs: 40000, method: '现金收款', cashGot: 0, crsGot: 0 },
+            { n: 3, due: '2026-12-31', cash: 20000, crs: 30000, method: '现金收款', cashGot: 0, crsGot: 0 }
+          ],
+          cash: [
+            { n: 1, due: '2026-06-30', cash: 30000, crs: 0, method: '现金收款', cashGot: 20000, crsGot: 0 },
+            { n: 2, due: '2026-09-30', cash: 30000, crs: 0, method: '现金收款', cashGot: 0, crsGot: 0 },
+            { n: 3, due: '2026-12-31', cash: 20000, crs: 0, method: '现金收款', cashGot: 0, crsGot: 0 }
+          ],
+          crs: [
+            { n: 1, due: '2026-06-30', cash: 0, crs: 50000, method: 'CRS抵扣', cashGot: 0, crsGot: 50000 },
+            { n: 2, due: '2026-09-30', cash: 0, crs: 40000, method: 'CRS抵扣', cashGot: 0, crsGot: 0 },
+            { n: 3, due: '2026-12-31', cash: 0, crs: 30000, method: 'CRS抵扣', cashGot: 0, crsGot: 0 }
+          ]
+        }
+      },
+      periodic: {
+        title: '周期性费用',
+        biz: '运营费用',
+        fee: '品牌技术服务费',
+        cycle: '2026-08',
+        deadline: '2026-09-15',
+        method: '现金收款',
+        share: false,
+        remark: '',
+        rule: '费用抵充完成后，全部打款给合作集团',
+        withhold: false,
+        base: 178139.46,
+        feeType: '2026-08-01~2026-08-31，按酒店含餐营业额比例5%',
+        feeTotal: 8906.97,
+        plans: [
+          { n: 1, due: '2026-08-31', amt: 4453.49 },
+          { n: 2, due: '2026-09-15', amt: 4453.48 }
+        ]
+      }
+    };
+
+    const LCC_PAY_TYPES = ['手动抵扣', 'CRS抵扣', 'CRS抵扣退回'];
+    const lccFees = (kind === 'onetime' ? [
+      { id: 'brand', name: '品牌使用费', cash: 0, crs: 5000, hotelRecv: 0, linkHotel: true, cashRows: [], crsRows: [], invoices: [], remark: '' },
+      {
+        id: 'install', name: '系统安装费', cash: 10000, crs: 50000, hotelRecv: 80000, hotelGot: 50000, remark: '',
+        cashRows: [],
+        crsRows: [
+          { id: '13008', date: '2026-09-18 10:00:00', amt: 25000, sn: '17925353208259256873308', type: 'CRS抵扣', note: '' },
+          { id: '12345', date: '2026-10-26 07:10:00', amt: 1129.88, sn: '1792967107480256147302', type: 'CRS抵扣', note: '' },
+          { id: '12023', date: '2026-10-21 12:10:01', amt: 139.12, sn: '1792362308573258147302', type: 'CRS抵扣', note: '' }
+        ],
+        invoices: []
+      }
+    ] : [
+      {
+        id: 'tech', name: '品牌技术服务费', feeTotal: 6263.71, cash: 0, crs: 0,
+        base: 250548.37, feeType: '2026-09-01~2026-09-30，按酒店客房营收比例2.5%', remark: '',
+        cashRows: [],
+        crsRows: [
+          { id: '12185', date: '2026-10-23 11:20:01', amt: 4384.90, sn: '1792722135998158873307', type: 'CRS抵扣', note: '' },
+          { id: '12179', date: '2026-10-23 07:02:02', amt: 1878.81, sn: '1792708027785218873307', type: 'CRS抵扣', note: '' }
+        ],
+        invoices: []
+      },
+      {
+        id: 'market', name: '市场营销费', feeTotal: 0, cash: 0, crs: 0,
+        base: 250883.37, feeType: '2026-09-01~2026-09-30，部分时段免收', remark: '',
+        cashRows: [], crsRows: [], invoices: []
+      },
+      {
+        id: 'maintain', name: '系统维护费', feeTotal: 1500, cash: 0, crs: 0,
+        base: 250548.37, feeType: '2026-09-01~2026-09-30，按约定金额收取', remark: '',
+        cashRows: [],
+        crsRows: [{ id: '14020', date: '2026-08-16 06:02:44', amt: 200, sn: '179310882210111873301', type: 'CRS抵扣', note: '' }],
+        invoices: []
+      }
+    ]);
+    const lccBook = lccFees.find(f => f.id === params.get('item'))
+      || lccFees.find(f => f.id === (kind === 'onetime' ? 'install' : 'tech'))
+      || lccFees[0];
+
+    function currentBook() {
+      return tab === 'lcc' ? lccBook : state;
+    }
+    function payMode() {
+      return tab === 'lcc';
+    }
+    const profile = profiles[kind];
+    if (params.get('fee')) profile.fee = params.get('fee');
+    const amt = kind === 'onetime' ? profile.amounts[channel] : null;
+    const state = kind === 'periodic' ? {
+      feeTotal: profile.feeTotal,
+      cash: 0,
+      crs: 0,
+      cashGot: 0,
+      crsGot: 0,
+      plan: installment ? profile.plans.map(p => ({ ...p, got: 0 })) : [],
+      crsRows: CRS_PERIOD.map(r => ({ ...r })),
+      cashRows: [],
+      invoices: []
+    } : {
+      cash: amt.cash,
+      crs: amt.crs,
+      cashGot: channel === 'crs' ? 0 : amt.cashGot,
+      crsGot: channel === 'cash' ? 0 : amt.crsGot,
+      plan: installment ? profile.plans[channel].map(p => ({ ...p })) : [],
+      crsRows: channel === 'cash' ? [] : CRS_ONCE.map(r => ({ ...r })),
+      cashRows: (channel !== 'crs' && amt.cashGot > 0) ? [
+        { id: '20115', date: '2026-07-15', amt: amt.cashGot, voucher: 'HZ-20260715', note: '' }
+      ] : [],
+      invoices: (channel !== 'crs' && amt.cashGot > 0) ? [
+        {
+          type: '增值税专用发票', date: '2026-07-20', amt: amt.cashGot,
+          entity: '南宁可阅酒店（轻开元/天骄路店）', special: '是', express: '',
+          refunded: '否', refundDate: '', refundAmt: '', redNo: ''
+        }
+      ] : []
+    };
+
+    function money(n) {
+      const sign = n < 0 ? '-' : '';
+      return sign + Math.abs(n).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function q(extra) {
+      const p = new URLSearchParams(location.search);
+      p.set('kind', kind);
+      p.set('channel', channel);
+      p.set('installment', installment ? '1' : '0');
+      p.set('tab', tab);
+      p.set('view', isGroup ? 'group' : 'lcc');
+      Object.entries(extra || {}).forEach(([k, v]) => p.set(k, v));
+      if (extra && extra.kind && extra.kind !== kind) {
+        p.delete('fee');
+        p.delete('item');
+        p.delete('settled');
+        p.delete('lcccash');
+      }
+      return '?' + p.toString();
+    }
+    function link(label, on, extra) {
+      return `<a class="${on ? 'sc-on' : ''}" href="${q(extra)}">${label}</a>`;
+    }
+    function settleTag(got, total, due) {
+      const left = total - got;
+      const overdue = due && due < TODAY && left > 0.001;
+      if (total <= 0.001) return '<span class="tag tag-default">无</span>';
+      if (left <= 0.001) return '<span class="tag tag-green">已结清</span>';
+      if (got > 0) return `<span class="tag ${overdue ? 'tag-red' : 'tag-orange'}">${overdue ? '部分收取 · 逾期' : '部分收取'}</span>`;
+      return `<span class="tag ${overdue ? 'tag-red' : 'tag-default'}">${overdue ? '未收取 · 逾期' : '未收取'}</span>`;
+    }
+    function periodStatus(p) {
+      const left = p.amt != null ? p.amt - (p.got || 0) : (p.cash - p.cashGot) + (p.crs - p.crsGot);
+      const got = p.amt != null ? (p.got || 0) : p.cashGot + p.crsGot;
+      const overdue = p.due < TODAY && left > 0.001;
+      if (left <= 0.001) return '<span class="tag tag-green">已结清</span>';
+      if (got > 0) return `<span class="tag ${overdue ? 'tag-red' : 'tag-orange'}">${overdue ? '部分收取 · 逾期' : '部分收取'}</span>`;
+      return `<span class="tag ${overdue ? 'tag-red' : 'tag-default'}">${overdue ? '未收取 · 逾期' : '未收取'}</span>`;
+    }
+
+    function renderChrome() {
+      const back = isGroup
+        ? `settlement-bill-list.html?type=${kind === 'onetime' ? 'onetime' : 'periodic'}`
+        : `lcc-bill-list.html?type=${kind === 'onetime' ? 'onetime' : 'periodic'}`;
+      document.getElementById('backLink').href = back;
+      document.getElementById('pageTitle').textContent = profile.title;
+      document.title = profile.title + ' - 合作集团线上结算';
+      document.getElementById('kindTag').innerHTML = `<span class="tag ${kind === 'onetime' ? 'tag-orange' : 'tag-blue'}">${profile.biz}</span>`;
+      document.getElementById('sidebar').innerHTML = isGroup ? `
+        <div class="sidebar-logo">合作集团结算</div>
+        <nav class="sidebar-nav">
+          <div class="nav-group-title">结算中心</div>
+          <a class="nav-sub-item" href="settlement-home.html">结算首页</a>
+          <a class="nav-sub-item active" href="settlement-bill-list.html">我的账单</a>
+          <a class="nav-sub-item" href="commission-bill-list.html?view=group">佣金账单明细</a>
+        </nav>` : `
+        <div class="sidebar-logo">合作集团结算</div>
+        <nav class="sidebar-nav">
+          <div class="nav-group-title">丽呈财务</div>
+          <a class="nav-sub-item" href="lcc-workbench.html">结算工作台</a>
+          <a class="nav-sub-item active" href="lcc-bill-list.html">账单管理</a>
+          <a class="nav-sub-item" href="commission-bill-list.html?view=lcc">佣金账单明细</a>
+        </nav>`;
+      document.getElementById('headerRole').innerHTML = isGroup ? '<option>合作集团A</option>' : '<option>Business</option>';
+      document.getElementById('avatar').textContent = isGroup ? '张' : '马';
+      document.getElementById('userName').textContent = isGroup ? '张财务 · 合作集团A' : '马敏 · 丽呈财务';
+
+      document.getElementById('scenarioBar').innerHTML = `
+        <span class="sc-label">账单：</span>
+        ${link('一次性', kind === 'onetime', { kind: 'onetime', tab: 'hotel' })}
+        ${link('周期性', kind === 'periodic', { kind: 'periodic', tab: 'hotel' })}
+        ${kind === 'onetime' ? `<span class="sc-label">收取结构：</span>
+        ${link('现金 + CRS', channel === 'mixed', { channel: 'mixed' })}
+        ${link('仅现金', channel === 'cash', { channel: 'cash' })}
+        ${link('仅 CRS 抵扣', channel === 'crs', { channel: 'crs' })}` : ''}
+        <span class="sc-label">分期：</span>
+        ${link('否', !installment, { installment: '0' })}
+        ${link('是', installment, { installment: '1' })}
+        ${kind === 'onetime' && channel !== 'cash' ? `<span class="sc-label">抵充：</span>
+        ${link('未完成', !settled, { settled: '0', tab: 'lcc', item: 'brand' })}
+        ${link('已完成', settled, { settled: '1', tab: 'lcc', item: 'brand' })}` : ''}
+        ${kind === 'onetime' ? `<span class="sc-label">品牌费现金：</span>
+        ${link('无', !lccCash, { lcccash: '0', tab: 'lcc', item: 'brand' })}
+        ${link('有', lccCash, { lcccash: '1', tab: 'lcc', item: 'brand' })}` : ''}
+        <span class="sc-label">视角：</span>
+        ${link('丽呈', !isGroup, { view: 'lcc' })}
+        ${link('合作集团', isGroup, { view: 'group' })}
+      `;
+
+      document.getElementById('basicInfo').innerHTML = `
+        <tr>
+          <th>酒店名称</th><td>南宁可阅酒店（轻开元/天骄路店）</td>
+          <th>UPID</th><td>255873</td>
+          <th>所属合作集团</th><td>合作集团A</td>
+        </tr>
+        <tr>
+          <th>代收代付规则</th><td>${profile.rule}</td>
+          <th>三方酒店合同编号</th><td>CLH820000004N</td>
+          <th>合同有效期</th><td>2020-04-01至2038-03-31</td>
+        </tr>`;
+
+      document.getElementById('billTabs').innerHTML = `
+        <a class="${tab === 'hotel' ? 'active' : ''}" href="${q({ tab: 'hotel' })}">合作集团应收酒店费用</a>
+        <a class="${tab === 'lcc' ? 'active' : ''}" href="${q({ tab: 'lcc' })}">丽呈应收合作集团费用</a>`;
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function dash(v) {
+      return v == null || v === '' ? '--' : esc(v);
+    }
+    function round2(n) {
+      return Math.round(Number(n) * 100) / 100;
+    }
+    function nextId(rows) {
+      const max = rows.reduce((m, r) => Math.max(m, parseInt(r.id, 10) || 0), 10000);
+      return String(max + 1);
+    }
+    function genSn() {
+      return '179' + String(Date.now()).slice(-18);
+    }
+    function recompute(book) {
+      const s = book || currentBook();
+      s.cashGot = round2((s.cashRows || []).reduce((sum, r) => sum + Number(r.amt), 0));
+      s.crsGot = round2((s.crsRows || []).reduce((sum, r) => sum + Number(r.amt), 0));
+      if (s !== state || !installment) return;
+      if (kind === 'periodic') {
+        let rest = round2(s.cashGot + s.crsGot);
+        s.plan.forEach(p => {
+          const take = Math.min(p.amt, Math.max(rest, 0));
+          p.got = round2(take);
+          rest = round2(rest - take);
+        });
+        return;
+      }
+      let restCash = s.cashGot;
+      let restCrs = s.crsGot;
+      s.plan.forEach(p => {
+        const takeC = Math.min(p.cash, Math.max(restCash, 0));
+        p.cashGot = round2(takeC);
+        restCash = round2(restCash - takeC);
+        const takeR = Math.min(p.crs, Math.max(restCrs, 0));
+        p.crsGot = round2(takeR);
+        restCrs = round2(restCrs - takeR);
+      });
+    }
+    function metrics(items, extra) {
+      const cls = extra ? ' ' + extra : '';
+      return `<div class="metric-row${cls}">${items.map(([k, v]) => `<div class="metric"><div class="mk">${k}</div><div class="mv${Number(v) < 0 ? ' neg' : ''}">${money(v)} 元</div></div>`).join('')}</div>`;
+    }
+    function addLink(label, bucket) {
+      if (isGroup) return '';
+      return `<button type="button" class="add-link" onclick="startAdd('${bucket}')">+ ${label}</button>`;
+    }
+    function dateInput(id, value) {
+      const v = value ? String(value).slice(0, 10) : '';
+      if (v) return `<input class="cell-input" id="${id}" type="date" value="${esc(v)}">`;
+      return `<input class="cell-input" id="${id}" type="text" placeholder="请选择" onfocus="this.type='date'" onblur="if(!this.value)this.type='text'">`;
+    }
+    function textInput(id, value, placeholder) {
+      return `<input class="cell-input" id="${id}" value="${esc(value)}" placeholder="${placeholder || '请输入'}">`;
+    }
+    function selectInput(id, value, options) {
+      return `<select class="cell-select" id="${id}">${options.map(o => `<option value="${esc(o)}"${o === value ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    }
+    function draftOps() {
+      return `<td class="row-ops"><button type="button" class="icon-btn" onclick="saveDraft()" title="保存">✓</button><button type="button" class="icon-btn cancel" onclick="cancelDraft()" title="取消">×</button></td>`;
+    }
+    function rowOps(bucket, index) {
+      if (isGroup) return '';
+      return `<td class="row-ops"><button type="button" class="btn-link" onclick="startEdit('${bucket}', ${index})">编辑</button><button type="button" class="btn-link danger" onclick="removeRow('${bucket}', ${index})">删除</button></td>`;
+    }
+    function opHead() {
+      return isGroup ? '' : '<th>操作</th>';
+    }
+
+    let draft = null;
+
+    function startAdd(bucket) {
+      if (bucket === 'cash') draft = { bucket, index: null, date: '', amt: '', voucher: '', note: '' };
+      else if (bucket === 'crs') draft = { bucket, index: null, date: '', amt: '', sn: genSn(), type: '手动抵扣', note: '' };
+      else draft = { bucket, index: null, type: '增值税普通发票', date: '', amt: '', entity: '', special: '否', express: '', refunded: '否', refundDate: '', refundAmt: '', redNo: '' };
+      render();
+    }
+    function startEdit(bucket, index) {
+      const book = currentBook();
+      const src = bucket === 'cash' ? book.cashRows[index] : bucket === 'crs' ? book.crsRows[index] : book.invoices[index];
+      draft = Object.assign({ bucket, index }, src);
+      render();
+    }
+    function cancelDraft() {
+      draft = null;
+      render();
+    }
+    function removeRow(bucket, index) {
+      const book = currentBook();
+      const list = bucket === 'cash' ? book.cashRows : bucket === 'crs' ? book.crsRows : book.invoices;
+      list.splice(index, 1);
+      if (draft && draft.bucket === bucket) draft = null;
+      recompute();
+      render();
+    }
+    function openCollect(book) {
+      return kind === 'periodic' && (book === state || book.feeTotal != null);
+    }
+    function collectedExcept(book, bucket, skipIndex) {
+      const cash = book.cashRows.reduce((sum, row, i) => sum + (bucket === 'cash' && i === skipIndex ? 0 : Number(row.amt)), 0);
+      const crs = book.crsRows.reduce((sum, row, i) => sum + (bucket === 'crs' && i === skipIndex ? 0 : Number(row.amt)), 0);
+      return round2(cash + crs);
+    }
+    function field(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    }
+    function saveDraft() {
+      if (!draft) return;
+      if (draft.bucket === 'cash') saveCash();
+      else if (draft.bucket === 'crs') saveCrs();
+      else saveInvoice();
+    }
+    function saveCash() {
+      const book = currentBook();
+      const date = field('fDate');
+      const raw = field('fAmt');
+      const amount = Number(raw);
+      const others = book.cashRows.reduce((s, r, i) => i === draft.index ? s : s + Number(r.amt), 0);
+      const left = openCollect(book) ? round2(book.feeTotal - collectedExcept(book, 'cash', draft.index)) : round2(book.cash - others);
+      if (!date) { toast(payMode() ? '请选择付款日期' : '请选择收款日期'); return; }
+      if (!raw || !(amount > 0)) { toast(payMode() ? '请填写付款金额' : '请填写收款金额'); return; }
+      if (amount - left > 0.001) { toast((openCollect(book) ? '不能超过未收金额 ' : '不能超过未付的现金 ') + money(left)); return; }
+      const row = {
+        id: draft.index == null ? nextId(book.cashRows) : book.cashRows[draft.index].id,
+        date, amt: round2(amount), voucher: field('fVoucher'), note: field('fNote')
+      };
+      if (draft.index == null) book.cashRows.unshift(row);
+      else book.cashRows[draft.index] = row;
+      draft = null;
+      recompute();
+      render();
+    }
+    function saveCrs() {
+      const book = currentBook();
+      const date = field('fDate');
+      const raw = field('fAmt');
+      let amount = Number(raw);
+      const type = field('fType') || '手动抵扣';
+      if (!date) { toast(payMode() ? '请选择付款日期' : '请选择抵扣日期'); return; }
+      if (!raw || !Number.isFinite(amount) || amount === 0) { toast(payMode() ? '请填写付款金额' : '请填写抵扣金额'); return; }
+      if (/退回$/.test(type) && amount > 0) amount = -amount;
+      if (openCollect(book)) {
+        const left = round2(book.feeTotal - collectedExcept(book, 'crs', draft.index));
+        if (amount - left > 0.001) { toast('不能超过未收金额 ' + money(left)); return; }
+      }
+      const row = {
+        id: draft.index == null ? nextId(book.crsRows) : book.crsRows[draft.index].id,
+        date: date.length === 10 && draft.date && String(draft.date).startsWith(date) ? draft.date : (date.length === 10 ? date + ' 00:00:00' : date),
+        amt: round2(amount),
+        sn: field('fSn') || genSn(),
+        type,
+        note: field('fNote')
+      };
+      if (draft.index == null) book.crsRows.unshift(row);
+      else book.crsRows[draft.index] = row;
+      draft = null;
+      recompute();
+      render();
+    }
+    function saveInvoice() {
+      const date = field('fDate');
+      const raw = field('fAmt');
+      const amount = Number(raw);
+      if (!field('fInvType')) { toast('请选择发票类型'); return; }
+      if (!date) { toast('请选择发票日期'); return; }
+      if (!raw || !(amount > 0)) { toast('请填写发票金额'); return; }
+      const row = {
+        type: field('fInvType'),
+        date,
+        amt: round2(amount),
+        entity: field('fEntity'),
+        special: field('fSpecial') || '否',
+        express: field('fExpress'),
+        refunded: field('fRefunded') || '否',
+        refundDate: field('fRefundDate'),
+        refundAmt: field('fRefundAmt'),
+        redNo: field('fRedNo')
+      };
+      if (draft.index == null) currentBook().invoices.unshift(row);
+      else currentBook().invoices[draft.index] = row;
+      draft = null;
+      render();
+    }
+
+    function cashEditor(d) {
+      return `<tr class="edit-row">
+        <td>${d.id || '--'}</td>
+        <td>${dateInput('fDate', d.date)}</td>
+        <td>${textInput('fAmt', d.amt, '请输入')}</td>
+        <td>${textInput('fVoucher', d.voucher || '', '请输入')}</td>
+        <td>${textInput('fNote', d.note || '', '请输入')}</td>
+        ${draftOps()}
+      </tr>`;
+    }
+    function crsEditor(d) {
+      return `<tr class="edit-row">
+        <td>${d.id || '--'}</td>
+        <td>${dateInput('fDate', d.date)}</td>
+        <td>${textInput('fAmt', d.amt, '请输入')}</td>
+        <td>${textInput('fSn', d.sn || '', '请输入')}</td>
+        <td>${selectInput('fType', d.type || '手动抵扣', payMode() ? LCC_PAY_TYPES : PAY_TYPES)}</td>
+        <td>${textInput('fNote', d.note || '', '请输入')}</td>
+        ${draftOps()}
+      </tr>`;
+    }
+    function invoiceEditor(d) {
+      return `<tr class="edit-row">
+        <td>${selectInput('fInvType', d.type || '增值税普通发票', INVOICE_TYPES)}</td>
+        <td>${dateInput('fDate', d.date)}</td>
+        <td>${textInput('fAmt', d.amt, '请输入')}</td>
+        <td>${textInput('fEntity', d.entity || '', '请输入')}</td>
+        <td>${selectInput('fSpecial', d.special || '否', ['否', '是'])}</td>
+        <td>${textInput('fExpress', d.express || '', '请输入')}</td>
+        <td>${selectInput('fRefunded', d.refunded || '否', ['否', '是'])}</td>
+        <td>${dateInput('fRefundDate', d.refundDate)}</td>
+        <td>${textInput('fRefundAmt', d.refundAmt || '', '请输入')}</td>
+        <td>${textInput('fRedNo', d.redNo || '', '请输入')}</td>
+        ${draftOps()}
+      </tr>`;
+    }
+
+    function cashTable() {
+      const book = currentBook();
+      const pay = payMode();
+      const editing = draft && draft.bucket === 'cash' ? draft.index : undefined;
+      const body = [];
+      if (draft && draft.bucket === 'cash' && draft.index == null) body.push(cashEditor(draft));
+      if (!book.cashRows.length && !(draft && draft.bucket === 'cash' && draft.index == null)) {
+        body.push(`<tr><td colspan="${isGroup ? 5 : 6}"><div class="empty-state">暂无数据</div></td></tr>`);
+      }
+      book.cashRows.forEach((r, i) => {
+        if (editing === i) body.push(cashEditor(draft));
+        else body.push(`<tr>
+          <td>${r.id}</td>
+          <td>${r.date}</td>
+          <td>${money(r.amt)}</td>
+          <td>${dash(r.voucher)}</td>
+          <td>${dash(r.note)}</td>
+          ${rowOps('cash', i)}
+        </tr>`);
+      });
+      return `
+        <section class="ledger cash">
+          <div class="ledger-hd">${pay ? '现金付款' : '现金收款'}</div>
+          ${openCollect(book) ? '' : metrics([['现金总额', book.cash], [pay ? '已付金额' : '已收金额', book.cashGot], [pay ? '未付金额' : '未收金额', book.cash - book.cashGot]])}
+          ${addLink(pay ? '添加付款信息' : '添加收款信息', 'cash')}
+          <div class="sheet-scroll">
+            <table class="data-table prod-table">
+              <thead><tr><th>ID</th><th>${pay ? '付款日期' : '收款日期'}</th><th>${pay ? '付款金额(元)' : '收款金额(元)'}</th><th>凭证号</th><th>备注</th>${opHead()}</tr></thead>
+              <tbody>${body.join('')}</tbody>
+            </table>
+          </div>
+        </section>`;
+    }
+
+    function crsTable() {
+      const book = currentBook();
+      const pay = payMode();
+      const editing = draft && draft.bucket === 'crs' ? draft.index : undefined;
+      const body = [];
+      if (draft && draft.bucket === 'crs' && draft.index == null) body.push(crsEditor(draft));
+      if (!book.crsRows.length && !(draft && draft.bucket === 'crs' && draft.index == null)) {
+        body.push(`<tr><td colspan="${isGroup ? 6 : 7}"><div class="empty-state">暂无数据</div></td></tr>`);
+      }
+      book.crsRows.forEach((r, i) => {
+        if (editing === i) body.push(crsEditor(draft));
+        else body.push(`<tr>
+          <td>${r.id}</td>
+          <td>${r.date}</td>
+          <td class="${r.amt < 0 ? 'neg' : ''}">${money(r.amt)}</td>
+          <td>${r.sn}</td>
+          <td>${r.type}</td>
+          <td>${dash(r.note)}</td>
+          ${rowOps('crs', i)}
+        </tr>`);
+      });
+      return `
+        <section class="ledger crs">
+          <div class="ledger-hd">CRS抵扣</div>
+          ${openCollect(book) ? '' : metrics([['抵扣总额', book.crs], ['已抵扣金额', book.crsGot], ['未抵扣金额', book.crs - book.crsGot]])}
+          ${pay ? '' : `<div class="remark-line"><span>抵扣备注</span><b>${dash(profile.remark)}</b></div>`}
+          ${addLink(pay ? '添加抵扣记录' : '添加费用信息', 'crs')}
+          <div class="sheet-scroll">
+            <table class="data-table prod-table">
+              <thead><tr><th>ID</th><th>${pay ? '付款日期' : '抵扣日期'}</th><th>${pay ? '付款金额(元)' : '抵扣金额(元)'}</th><th>${pay ? '付款流水号' : '抵扣流水号'}</th><th>${pay ? '付款类型' : '收款类型'}</th><th>备注</th>${opHead()}</tr></thead>
+              <tbody>${body.join('')}</tbody>
+            </table>
+          </div>
+        </section>`;
+    }
+
+    function invoiceTable() {
+      const book = currentBook();
+      const editing = draft && draft.bucket === 'invoice' ? draft.index : undefined;
+      const cols = isGroup ? 10 : 11;
+      const body = [];
+      if (draft && draft.bucket === 'invoice' && draft.index == null) body.push(invoiceEditor(draft));
+      if (!book.invoices.length && !(draft && draft.bucket === 'invoice' && draft.index == null)) {
+        body.push(`<tr><td colspan="${cols}"><div class="empty-state">暂无数据</div></td></tr>`);
+      }
+      book.invoices.forEach((r, i) => {
+        if (editing === i) body.push(invoiceEditor(draft));
+        else body.push(`<tr>
+          <td>${r.type}</td>
+          <td>${r.date}</td>
+          <td>${money(r.amt)}</td>
+          <td>${dash(r.entity)}</td>
+          <td>${r.special || '否'}</td>
+          <td>${dash(r.express)}</td>
+          <td>${r.refunded || '否'}</td>
+          <td>${dash(r.refundDate)}</td>
+          <td>${r.refundAmt === '' || r.refundAmt == null ? '--' : money(Number(r.refundAmt))}</td>
+          <td>${dash(r.redNo)}</td>
+          ${rowOps('invoice', i)}
+        </tr>`);
+      });
+      return `
+        <section class="ledger">
+        <div class="ledger-hd">发票</div>
+        ${addLink('添加发票信息', 'invoice')}
+        <div class="sheet-scroll">
+          <table class="data-table prod-table">
+            <thead>
+              <tr>
+                <th>发票类型</th><th>发票日期</th><th>发票金额(元)</th><th>发票主体</th><th>是否专票</th>
+                <th>快递单号/快递链接</th><th>是否退票</th><th>退票日期</th><th>退票金额</th><th>红冲发票号</th>
+                ${opHead()}
+              </tr>
+            </thead>
+            <tbody>${body.join('')}</tbody>
+          </table>
+        </div>
+        </section>`;
+    }
+
+    function renderHotel() {
+      const total = kind === 'periodic' ? state.feeTotal : state.cash + state.crs;
+      const got = state.cashGot + state.crsGot;
+      const methodText = kind === 'periodic' ? '现金收款、CRS抵扣' : [state.cash > 0 ? '现金收款' : '', state.crs > 0 ? 'CRS抵扣' : ''].filter(Boolean).join('、');
+      const deadlineText = installment ? state.plan[state.plan.length - 1].due : profile.deadline;
+      const planHtml = installment ? `
+        <section class="ledger">
+        <div class="ledger-hd">分期计划</div>
+        <div class="sheet-scroll plan-wrap">
+          <table class="data-table prod-table">
+            <thead>
+              <tr>
+                <th>期次</th>
+                <th>收费截止</th>
+                ${kind === 'periodic' ? '<th>本期费用</th><th>已收</th>' : `${state.cash > 0 ? '<th>本期现金</th><th>现金已收</th>' : ''}${state.crs > 0 ? '<th>本期 CRS 抵扣</th><th>CRS 已抵扣</th>' : ''}<th>收费方式</th>`}
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.plan.map(p => `
+                <tr>
+                  <td>第 ${p.n} 期</td>
+                  <td>${p.due}</td>
+                  ${kind === 'periodic' ? `<td>${money(p.amt)}</td><td>${money(p.got || 0)}</td>` : `${state.cash > 0 ? `<td>${money(p.cash)}</td><td>${money(p.cashGot)}</td>` : ''}${state.crs > 0 ? `<td>${money(p.crs)}</td><td>${money(p.crsGot)}</td>` : ''}<td>${p.method}</td>`}
+                  <td>${periodStatus(p)}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        </section>` : '';
+
+      const summary = kind === 'periodic'
+        ? `${metrics([['费用金额', total], ['已收金额', got], ['未收金额', total - got]], 'primary')}
+        ${metrics([['现金已收总额', state.cashGot], ['抵扣已收总额', state.crsGot]])}
+        <div class="meta-line">
+          <span>费用基数 <b>${money(profile.base)} 元</b></span>
+          <span>费用类型 <b>${profile.feeType}</b></span>
+          <span>是否分期收取 <b>${installment ? '是' : '否'}</b></span>
+          <span>收费截止日期 <b>${deadlineText}</b></span>
+          <span>收费方式 <b>${methodText}</b></span>
+        </div>`
+        : `${metrics([['应收总额', total], ['已收金额', got], ['未收金额', total - got]], 'primary')}
+        ${metrics([['现金总额', state.cash], ['CRS抵扣金额', state.crs]])}
+        <div class="meta-line">
+          <span>是否分期收取 <b>${installment ? '是' : '否'}</b></span>
+          <span>收费截止日期 <b>${deadlineText}</b></span>
+          <span>收费方式 <b>${methodText}</b></span>
+          <span>是否分佣 <b>${profile.share ? '是' : '否'}</b></span>
+          <span>费用周期 <b>${profile.cycle}</b></span>
+        </div>`;
+
+      document.getElementById('hotelPane').innerHTML = `
+        <div class="sheet-title">${profile.fee}</div>
+        ${summary}
+        <div class="ledger-stack">
+          ${planHtml}
+          ${kind === 'periodic' || state.cash > 0 ? cashTable() : ''}
+          ${kind === 'periodic' || state.crs > 0 ? crsTable() : ''}
+          ${invoiceTable()}
+        </div>`;
+    }
+
+    function lccWithholdOf(fee) {
+      // 一次性：轧差只扣丽呈各费项的 CRS；现金应付走现金付款，不进代收代付
+      // 周期性：无现金/抵扣配额，费用金额整笔参与轧差
+      return kind === 'periodic' ? (fee.feeTotal || 0) : (fee.crs || 0);
+    }
+    function lccPayableSum() {
+      return round2(lccFees.reduce((sum, fee) => sum + lccWithholdOf(fee), 0));
+    }
+    function hotelPool() {
+      return kind === 'periodic' ? state.crsGot : state.crs;
+    }
+    function hotelWithhold() {
+      if (!profile.withhold) return 0;
+      const sum = lccPayableSum();
+      const pool = hotelPool();
+      return pool > 0 && sum > 0 && sum <= pool + 0.001 ? sum : 0;
+    }
+    function feePaid(fee) {
+      return round2((fee.cashGot || 0) + (fee.crsGot || 0));
+    }
+    function formulaRow(parts, total) {
+      const bits = [];
+      parts.forEach((part, i) => {
+        if (i) bits.push('<div class="op">−</div>');
+        bits.push(`<div><span class="k">${part[0]}</span><span class="v${part[1] < 0 ? ' neg' : ''}">${money(part[1])} 元</span></div>`);
+      });
+      bits.push('<div class="op">=</div>');
+      bits.push(`<div><span class="k">${total[0]}</span><span class="v result${total[1] < 0 ? ' neg' : ''}">${money(total[1])} 元</span></div>`);
+      return `<div class="formula${total[2] ? ' total' : ''}">${bits.join('')}</div>`;
+    }
+    function payoutCard() {
+      const pool = hotelPool();
+      const hold = hotelWithhold();
+      if (kind !== 'periodic' && !(hold > 0)) return '';
+      const remit = round2(pool - hold);
+      const ready = kind === 'periodic'
+        ? state.cashGot + state.crsGot + 0.001 >= state.feeTotal && state.feeTotal > 0
+        : state.crsGot + 0.001 >= state.crs;
+      const debts = lccFees
+        .filter(fee => lccWithholdOf(fee) > 0)
+        .map(fee => `${fee.name} ${money(lccWithholdOf(fee))} 元`)
+        .join('、');
+      const poolLabel = kind === 'periodic' ? '抵扣已收' : '代扣合计';
+      const note = hold > 0
+        ? (kind === 'periodic'
+          ? `酒店各费项代扣合并后，扣除丽呈全部费项 ${money(hold)} 元（${debts}），剩余打给合作集团`
+          : `酒店各费项代扣合并后，扣除丽呈各费项 CRS 抵扣 ${money(hold)} 元（${debts}），剩余一次性打给合作集团`)
+        : `抵扣已收 ${money(pool)} 元，费用收齐后全部打给合作集团`;
+      const tag = kind === 'periodic'
+        ? (ready ? '已结清，打款给合作集团' : '待费用收齐后打款')
+        : (ready ? '已结清，合并打款' : '待全部费项结清后合并打款');
+      return `
+        <section class="flow">
+          <div class="flow-hd">
+            <span><span class="who">丽呈</span> 应付 <span class="who">合作集团</span></span>
+            <span class="tag ${ready ? 'tag-green' : 'tag-orange'}">${tag}</span>
+          </div>
+          ${metrics([['合并打款', remit], [poolLabel, pool], ['应付丽呈合计', hold]], 'primary')}
+          <div class="pool-note">${note}</div>
+          ${formulaRow([[poolLabel, pool], ['应付丽呈合计', hold]], ['合并打款', remit, true])}
+        </section>`;
+    }
+    function renderPayout() {
+      const pane = document.getElementById('payoutPane');
+      const html = payoutCard();
+      pane.style.display = html ? '' : 'none';
+      pane.innerHTML = html ? `<div class="legacy-section-title">代收代付</div>${html}` : '';
+    }
+
+    function renderLcc() {
+      const fee = lccBook;
+      const periodic = kind === 'periodic';
+      const payable = periodic ? fee.feeTotal : round2(fee.cash + fee.crs);
+      const paid = feePaid(fee);
+      const unpaid = round2(payable - paid);
+      const pills = lccFees.map(f => `<a class="${f.id === fee.id ? 'active' : ''}" href="${q({ tab: 'lcc', item: f.id })}">${f.name}</a>`).join('');
+      const payBlocks = periodic ? `${cashTable()}${crsTable()}` : `${fee.cash > 0 ? cashTable() : ''}${fee.crs > 0 ? crsTable() : ''}`;
+      const summary = periodic
+        ? `${metrics([['费用金额', payable], ['已付', paid], ['未付', unpaid]], 'primary')}
+          ${metrics([['现金已付总额', fee.cashGot], ['抵扣已付总额', fee.crsGot]])}
+          <div class="meta-line">
+            <span>丽呈费用基数 <b>${money(fee.base)} 元</b></span>
+            <span>费用类型 <b>${fee.feeType}</b></span>
+          </div>`
+        : `${metrics([['应付总额', payable], ['已付', paid], ['未付', unpaid]], 'primary')}
+          ${metrics([['其中现金', fee.cash], ['其中 CRS 抵扣', fee.crs]])}`;
+      document.getElementById('lccPane').innerHTML = `
+        <div class="fee-pills">${pills}</div>
+        <div class="sheet-title">${fee.name}</div>
+        <section class="flow">
+          <div class="flow-hd"><span class="who">合作集团</span> 付给 <span class="who">丽呈</span></div>
+          ${summary}
+        </section>
+        <div class="ledger-stack">
+          ${payBlocks ? `<div class="stack-label">合作集团已付丽呈</div>${payBlocks}` : ''}
+          ${invoiceTable()}
+        </div>
+        <div class="remark-line"><span>备注</span><b>${dash(fee.remark)}</b></div>`;
+    }
+
+    function render() {
+      renderChrome();
+      renderPayout();
+      if (tab === 'lcc') {
+        document.getElementById('hotelPane').style.display = 'none';
+        document.getElementById('lccPane').style.display = '';
+        renderLcc();
+      } else {
+        document.getElementById('lccPane').style.display = 'none';
+        document.getElementById('hotelPane').style.display = '';
+        renderHotel();
+      }
+    }
+
+    if (lccCash && kind === 'onetime') {
+      const brand = lccFees.find(f => f.id === 'brand');
+      if (brand) {
+        brand.cash = 3000;
+        brand.cashRows.push({ id: '21001', date: '2026-09-01', amt: 1000, voucher: 'XJ-20260901', note: '' });
+      }
+    }
+    if (settled && state.crs > 0) {
+      const got = round2(state.crsRows.reduce((sum, r) => sum + Number(r.amt), 0));
+      const gap = round2(state.crs - got);
+      if (gap > 0.001) {
+        state.crsRows.unshift({
+          id: '18660', date: '2026-10-18 11:20:08', amt: gap,
+          sn: '179310882210333873301', type: 'CRS代扣', note: ''
+        });
+      }
+      lccFees.forEach((fee, index) => {
+        const crsGot = round2((fee.crsRows || []).reduce((sum, r) => sum + Number(r.amt), 0));
+        const crsGap = round2(fee.crs - crsGot);
+        if (crsGap > 0.001) {
+          fee.crsRows.push({
+            id: nextId(fee.crsRows), date: '2026-10-20 09:00:00', amt: crsGap,
+            sn: '1793200000000008733' + String(index + 1).padStart(2, '0'), type: 'CRS抵扣', note: ''
+          });
+        }
+        const cashGot = round2((fee.cashRows || []).reduce((sum, r) => sum + Number(r.amt), 0));
+        const cashGap = round2(fee.cash - cashGot);
+        if (cashGap > 0.001) {
+          fee.cashRows.push({
+            id: nextId(fee.cashRows), date: '2026-10-20', amt: cashGap, voucher: 'XJ-20261020', note: ''
+          });
+        }
+      });
+    }
+    recompute(state);
+    lccFees.forEach(f => recompute(f));
+    render();
+  </script>
+</body>
+</html>

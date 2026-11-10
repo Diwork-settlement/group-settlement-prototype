@@ -89,6 +89,7 @@
 
         <div class="money-strip" id="moneyStrip"></div>
 
+        <div id="hotelCharge"></div>
         <div id="feeGroup"></div>
 
         <div class="form-card" id="invoicePanel"></div>
@@ -256,8 +257,8 @@
         push: '2026-08-03 14:20（合同触发）', category: '待确认',
         recv: '0.00', pay: '15,000.00', got: '0.00', gave: '15,000.00',
         fees: [
-          ['品牌使用费', '酒店A · 一次性', '应付', '5,000.00', '#'],
-          ['系统安装费', '酒店B · 一次性', '应付', '10,000.00', '#'],
+          ['品牌使用费', '丽呈向集团收取', '应付', '5,000.00', ''],
+          ['系统安装费', '丽呈向集团收取', '应付', '10,000.00', ''],
         ]
       },
     };
@@ -300,6 +301,51 @@
       scenario === 'upload' ? '<span class="tag tag-red">待上传</span>' :
       scenario === 'invoice' ? '<span class="tag tag-orange">可申请开票</span>' :
       scenario === 'confirmed' ? '<span class="tag tag-green">已完成</span>' : '<span class="tag tag-default">—</span>';
+
+    const hotelChargeRows = {
+      onetime: [
+        ['品牌使用费', '南宁可阅酒店', '200,000.00', '80,000.00', '120,000.00', '否', '70,000.00', '130,000.00', 'tag-orange', '部分收取', 'fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=group'],
+        ['系统安装费', '丽呈酒店·示例店B', '80,000.00', '80,000.00', '0.00', '是', '20,000.00', '60,000.00', 'tag-orange', '部分收取', 'fee-bill-detail.html?kind=onetime&channel=cash&installment=1&view=group&fee=系统安装费'],
+      ],
+      periodic: [
+        ['品牌技术服务费', '丽呈酒店·示例店A', '8,906.97', '0.00', '649.80', '否', '649.80', '8,257.17', 'tag-orange', '部分收取', 'fee-bill-detail.html?kind=periodic&channel=mixed&installment=0&view=group'],
+        ['系统维护费', '丽呈酒店·示例店B', '4,000.00', '0.00', '0.00', '否', '0.00', '4,000.00', 'tag-default', '未收取', 'fee-bill-detail.html?kind=periodic&channel=cash&installment=0&view=group&fee=系统维护费'],
+        ['市场营销费', '丽呈酒店·示例店C', '8,000.00', '0.00', '3,200.00', '否', '3,200.00', '4,800.00', 'tag-orange', '部分收取', 'fee-bill-detail.html?kind=periodic&channel=crs&installment=0&view=group&fee=市场营销费'],
+      ]
+    };
+    const hotelRows = hotelChargeRows[type];
+    document.getElementById('hotelCharge').innerHTML = hotelRows ? `
+      <div class="fee-group" style="margin-bottom:12px">
+        <div class="fee-group-header">
+          <span class="fg-title"><span class="fg-chevron">▾</span> 合作集团应收酒店</span>
+          <span class="fg-total"></span>
+        </div>
+        <div class="fee-group-body">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>费用项</th><th>酒店</th>
+                <th class="text-right">总额</th><th class="text-right">${type === 'periodic' ? '现金已收' : '现金'}</th><th class="text-right">${type === 'periodic' ? '抵扣已收' : 'CRS抵扣'}</th>
+                <th>分期</th><th class="text-right">已收</th><th class="text-right">未收</th><th>状态</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${hotelRows.map(r => `
+                <tr>
+                  <td>${r[0]}</td><td>${r[1]}</td>
+                  <td class="text-right">${r[2]}</td>
+                  <td class="text-right">${r[3]}</td>
+                  <td class="text-right">${r[4]}</td>
+                  <td>${r[5]}</td>
+                  <td class="text-right">${r[6]}</td>
+                  <td class="text-right">${r[7]}</td>
+                  <td><span class="tag ${r[8]}">${r[9]}</span></td>
+                  <td><a class="btn-link" href="${r[10]}">酒店账单 →</a></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>` : '';
 
     if (tm.splitBlocks) {
       document.getElementById('feeGroup').innerHTML = `
@@ -348,7 +394,7 @@
       document.getElementById('feeGroup').innerHTML = `
         <div class="fee-group">
           <div class="fee-group-header" onclick="toggleFeeGroup(this)">
-            <span class="fg-title"><span class="fg-chevron">▾</span> ${tm.name}明细</span>
+            <span class="fg-title"><span class="fg-chevron">▾</span> 丽呈与合作集团</span>
             <span class="fg-total">应收 ¥ ${tm.recv}　应付 ¥ ${tm.pay}</span>
           </div>
           <div class="fee-group-body">
@@ -360,7 +406,7 @@
                     <td>${f[0]}</td><td>${f[1]}</td>
                     <td><span class="fee-dir-tag ${f[2]==='应收'?'to-group':'to-lcc'}">${f[2]}</span></td>
                     <td class="text-right">${f[3]}</td>
-                    <td><a class="btn-link" href="${f[4]}">${type==='periodic'?'查看酒店明细 →':'查看明细 →'}</a></td>
+                    <td>${f[4] ? `<a class="btn-link" href="${f[4]}">${type==='periodic'?'查看酒店明细 →':'查看明细 →'}</a>` : '—'}</td>
                   </tr>
                 `).join('')}
               </tbody>
