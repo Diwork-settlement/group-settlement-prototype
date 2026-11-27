@@ -477,6 +477,13 @@
   color: #876800;
   text-decoration: underline;
 }
+.scenario-bar a.active {
+  font-weight: 700;
+  background: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+}
 .scenario-bar .sc-label { font-weight: 600; }
 
 .readonly-mask {

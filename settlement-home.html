@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分佣账单 - 合作集团线上结算</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/settlement.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="icon-rail">
+      <div class="rail-logo">B</div>
+      <a class="rail-item" href="index.html" title="首页">⌂</a>
+      <a class="rail-item" title="运营">☰</a>
+      <a class="rail-item" title="数据">▤</a>
+      <a class="rail-item" title="CRM">◎</a>
+      <a class="rail-item" title="营销">✦</a>
+      <a class="rail-item active" title="财务">¥</a>
+    </aside>
+    <aside class="sidebar">
+      <div class="sidebar-logo">business</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">合作集团费用</div>
+        <a class="nav-sub-item active" href="settlement-home.html">分佣账单</a>
+      </nav>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-search"><span>🔍</span><input type="text" placeholder="搜索"></div>
+        <div class="header-right">
+          <select class="header-select"><option>合作集团A</option></select>
+          <div class="user-info"><div class="user-avatar">张</div><span>张财务 · 合作集团A</span></div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="detail-header">
+          <div>
+            <h1 class="page-title">分佣账单</h1>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-item">
+            <span class="filter-label">账单时间</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <select class="filter-select" id="periodFrom"></select>
+              <span style="color:var(--text-muted)">至</span>
+              <select class="filter-select" id="periodTo"></select>
+            </div>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">账单状态</span>
+            <select class="filter-select" id="statusFilter"></select>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" onclick="query()">查询</button>
+            <button class="btn btn-default" onclick="resetFilters()">重置</button>
+          </div>
+        </div>
+
+        <div class="overview-grid" id="moneyGrid" style="grid-template-columns:repeat(4,1fr)"></div>
+
+        <div class="scenario-bar" id="todoChips" style="margin-top:0"></div>
+
+        <div class="table-card table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>账单时间</th>
+                <th>业务类型</th>
+                <th class="text-right">应收</th>
+                <th class="text-right">应付</th>
+                <th class="text-right">丽呈应开票金额</th>
+                <th class="text-right">集团应开票金额</th>
+                <th>账单状态</th>
+                <th>收款状态</th>
+                <th>付款状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="billBody"></tbody>
+          </table>
+          <div class="pagination" id="pager"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="js/settlement.js"></script>
+  <script>
+    const statuses = ['生成中', '待对账', '有异议', '待上传发票', '已确认'];
+    const todoKeys = ['待对账', '有异议', '待上传发票'];
+    const tagOf = {
+      '生成中': 'tag-default',
+      '待对账': 'tag-orange',
+      '有异议': 'tag-red',
+      '待上传发票': 'tag-orange',
+      '已确认': 'tag-green',
+      '未收款': 'tag-default',
+      '未付款': 'tag-default',
+      '部分收款': 'tag-orange',
+      '部分付款': 'tag-orange',
+      '已收款': 'tag-green',
+      '已付款': 'tag-green'
+    };
+    const bills = [
+      { period: '2026-09', biz: '直销', recv: null, pay: null, got: null, gave: null, status: '生成中', recvSt: '—', paySt: '—', href: 'commission-settle-bill.html?view=group' },
+      { period: '2026-08', biz: '直销', recv: 19500, pay: 23700, got: 0, gave: 0, status: '待对账', recvSt: '未收款', paySt: '未付款', href: 'commission-settle-bill.html?view=group' },
+      { period: '2026-07', biz: '直销', recv: 20480, pay: 18420, got: 0, gave: 0, status: '已确认', recvSt: '未收款', paySt: '未付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2026-06', biz: '直销', recv: 21050, pay: 31050, got: 21050, gave: 0, status: '待上传发票', recvSt: '已收款', paySt: '未付款', href: 'settlement-bill-detail.html?scenario=upload' },
+      { period: '2026-05', biz: '直销', recv: 18220, pay: 22100, got: 18220, gave: 22100, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2026-04', biz: '直销', recv: 17640, pay: 19880, got: 17640, gave: 19880, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2026-03', biz: '直销', recv: 20110, pay: 18640, got: 0, gave: 0, status: '有异议', recvSt: '未收款', paySt: '未付款', href: 'settlement-bill-detail.html?scenario=dispute' },
+      { period: '2026-02', biz: '直销', recv: 16890, pay: 17320, got: 16890, gave: 17320, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2026-01', biz: '直销', recv: 15420, pay: 16110, got: 15420, gave: 16110, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2025-12', biz: '直销', recv: 19870, pay: 21450, got: 19870, gave: 21450, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2025-11', biz: '直销', recv: 14330, pay: 15280, got: 14330, gave: 15280, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2025-10', biz: '直销', recv: 16750, pay: 17110, got: 0, gave: 0, status: '待对账', recvSt: '未收款', paySt: '未付款', href: 'settlement-bill-detail.html?scenario=pending' },
+      { period: '2025-09', biz: '直销', recv: 13980, pay: 14660, got: 13980, gave: 14660, status: '已确认', recvSt: '已收款', paySt: '已付款', href: 'settlement-bill-detail.html?scenario=confirmed' },
+      { period: '2025-08', biz: '直销', recv: 12840, pay: 13520, got: 12840, gave: 10000, status: '已确认', recvSt: '已收款', paySt: '部分付款', href: 'settlement-bill-detail.html?scenario=confirmed' }
+    ];
+
+    let page = 1;
+    let pageSize = 10;
+
+    const fmt = n => n.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const money = n => n == null ? '—' : fmt(n);
+    const add = (s, n) => Math.round((s + (n || 0)) * 100) / 100;
+
+    function fillSelect(id, options, value) {
+      const el = document.getElementById(id);
+      el.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      el.value = value;
+    }
+
+    function initFilters() {
+      const periods = bills.map(b => b.period);
+      const periodOptions = [{ value: '', label: '全部' }].concat(periods.map(p => ({ value: p, label: p })));
+      fillSelect('periodFrom', periodOptions, '');
+      fillSelect('periodTo', periodOptions, '');
+      fillSelect('statusFilter', [{ value: '', label: '全部' }].concat(statuses.map(s => ({ value: s, label: s }))), '');
+    }
+
+    function inRange(period) {
+      const from = document.getElementById('periodFrom').value;
+      const to = document.getElementById('periodTo').value;
+      if (from && period < from) return false;
+      if (to && period > to) return false;
+      return true;
+    }
+
+    function timeFiltered() {
+      return bills.filter(b => inRange(b.period));
+    }
+
+    function filtered() {
+      const status = document.getElementById('statusFilter').value;
+      return timeFiltered().filter(b => !status || b.status === status);
+    }
+
+    function render() {
+      const rows = filtered();
+      const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+      if (page > pages) page = pages;
+      const sum = rows.reduce((s, b) => ({
+        recv: add(s.recv, b.recv),
+        pay: add(s.pay, b.pay),
+        got: add(s.got, b.got),
+        gave: add(s.gave, b.gave)
+      }), { recv: 0, pay: 0, got: 0, gave: 0 });
+
+      document.getElementById('moneyGrid').innerHTML = `
+        <div class="overview-card"><div class="ov-label">应收</div><div class="ov-value primary">¥ ${fmt(sum.recv)}</div><div class="ov-sub">丽呈应结给本集团</div></div>
+        <div class="overview-card"><div class="ov-label">应付</div><div class="ov-value">¥ ${fmt(sum.pay)}</div><div class="ov-sub">本集团应结给丽呈</div></div>
+        <div class="overview-card"><div class="ov-label">已收</div><div class="ov-value success">¥ ${fmt(sum.got)}</div></div>
+        <div class="overview-card"><div class="ov-label">已付</div><div class="ov-value warn">¥ ${fmt(sum.gave)}</div></div>
+      `;
+
+      const status = document.getElementById('statusFilter').value;
+      const base = timeFiltered();
+      document.getElementById('todoChips').innerHTML = '<span class="sc-label">待办</span>' + todoKeys.map(key => {
+        const count = base.filter(b => b.status === key).length;
+        const on = status === key ? ' active' : '';
+        return `<a href="#" class="${on}" data-todo="${key}">${key} ${count}</a>`;
+      }).join('');
+
+      const slice = rows.slice((page - 1) * pageSize, page * pageSize);
+      document.getElementById('billBody').innerHTML = slice.length ? slice.map(b => `
+        <tr>
+          <td>${b.period}</td>
+          <td>${b.biz}</td>
+          <td class="text-right">${money(b.recv)}</td>
+          <td class="text-right">${money(b.pay)}</td>
+          <td class="text-right">${money(b.recv)}</td>
+          <td class="text-right">${money(b.pay)}</td>
+          <td><span class="tag ${tagOf[b.status]}">${b.status}</span></td>
+          <td>${b.recvSt === '—' ? '—' : `<span class="tag ${tagOf[b.recvSt]}">${b.recvSt}</span>`}</td>
+          <td>${b.paySt === '—' ? '—' : `<span class="tag ${tagOf[b.paySt]}">${b.paySt}</span>`}</td>
+          <td><a class="btn-link" href="commission-settle-bill.html?view=group&period=${b.period}&status=${encodeURIComponent(b.status)}">查看</a></td>
+        </tr>
+      `).join('') : '<tr><td colspan="10" class="empty-state">没有符合条件的账单</td></tr>';
+
+      const pageButtons = Array.from({ length: pages }, (_, i) => i + 1).map(n =>
+        `<button class="page-btn${n === page ? ' active' : ''}" type="button" data-page="${n}">${n}</button>`
+      ).join('');
+      document.getElementById('pager').innerHTML = `
+        <span style="font-size:12px;color:var(--text-muted);margin-right:8px">共 ${rows.length} 条</span>
+        <select id="pageSize" style="height:28px;border:1px solid var(--border);border-radius:4px;font-size:12px">
+          <option value="10" ${pageSize === 10 ? 'selected' : ''}>10条/页</option>
+          <option value="20" ${pageSize === 20 ? 'selected' : ''}>20条/页</option>
+          <option value="50" ${pageSize === 50 ? 'selected' : ''}>50条/页</option>
+        </select>
+        <button class="page-btn" type="button" data-page="${page - 1}" ${page <= 1 ? 'disabled' : ''}>‹</button>
+        ${pageButtons}
+        <button class="page-btn" type="button" data-page="${page + 1}" ${page >= pages ? 'disabled' : ''}>›</button>
+      `;
+    }
+
+    function query() {
+      const from = document.getElementById('periodFrom').value;
+      const to = document.getElementById('periodTo').value;
+      if (from && to && from > to) {
+        document.getElementById('periodFrom').value = to;
+        document.getElementById('periodTo').value = from;
+      }
+      page = 1;
+      render();
+    }
+
+    function resetFilters() {
+      document.getElementById('periodFrom').value = '';
+      document.getElementById('periodTo').value = '';
+      document.getElementById('statusFilter').value = '';
+      page = 1;
+      render();
+    }
+
+    document.getElementById('todoChips').addEventListener('click', (e) => {
+      const link = e.target.closest('[data-todo]');
+      if (!link) return;
+      e.preventDefault();
+      const key = link.dataset.todo;
+      const sel = document.getElementById('statusFilter');
+      sel.value = sel.value === key ? '' : key;
+      page = 1;
+      render();
+    });
+
+    document.getElementById('pager').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-page]');
+      if (!btn || btn.disabled) return;
+      const next = Number(btn.dataset.page);
+      const pages = Math.max(1, Math.ceil(filtered().length / pageSize));
+      if (next < 1 || next > pages) return;
+      page = next;
+      render();
+    });
+
+    document.getElementById('pager').addEventListener('change', (e) => {
+      if (e.target.id !== 'pageSize') return;
+      pageSize = Number(e.target.value);
+      page = 1;
+      render();
+    });
+
+    initFilters();
+    render();
+  </script>
+</body>
+</html>

@@ -3,52 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>费用账单 · 现金与 CRS 抵扣</title>
+  <title>合作集团线上结算 · 佣金账单（一期）</title>
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/settlement.css">
 </head>
 <body>
   <div class="index-page">
-    <h1>费用账单 · 现金与 CRS 抵扣</h1>
-    <p>本次需求原型：一次性 / 周期性费用支持现金收款与 CRS 抵扣，含代收代付轧差。</p>
+    <h1>合作集团线上结算 · 佣金账单</h1>
+    <p>本期范围：仅做分佣账单（客房分佣、营销分成）。周期性费用、一次性费用不在本期。</p>
 
-    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">丽呈财务</h2>
+    <div class="flow-path-banner" style="margin-bottom:16px">
+      <div class="flow-path-card path-rule">
+        <strong>佣金账单（本期）</strong>
+        按账期汇总应收 / 应付；账单内按客房、营销汇总，明细可下载；不做轧差
+      </div>
+      <div class="flow-path-card path-bill">
+        <strong>对账与收付</strong>
+        集团对账 / 异议 / 开票上传；丽呈登记收款付款；发票 OCR 校验
+      </div>
+    </div>
+
+    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">合作集团端</h2>
     <div class="index-links" style="margin-bottom:32px">
       <div class="index-card">
-        <h3>一次性费用</h3>
-        <p>总额 = 现金 + CRS；代收代付轧差只扣丽呈 CRS</p>
+        <h3>分佣账单</h3>
+        <p>合作集团查看本期佣金账单。</p>
         <div class="links">
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=lcc&tab=hotel">→ 合作集团应收酒店</a>
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=lcc&tab=lcc&item=brand">→ 丽呈应收 · 品牌使用费</a>
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=lcc&tab=lcc&item=brand&settled=1">→ 品牌使用费 · 抵充已完成</a>
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=lcc&tab=lcc&item=brand&lcccash=1">→ 品牌使用费 · 含现金</a>
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=lcc&tab=lcc&item=install">→ 丽呈应收 · 系统安装费</a>
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=1&view=lcc&tab=hotel">→ 分期收取</a>
+          <a href="settlement-home.html">→ 分佣账单</a>
         </div>
       </div>
       <div class="index-card">
-        <h3>周期性费用</h3>
-        <p>费用金额为账期总额；只记现金已收 / 抵扣已收</p>
+        <h3>佣金账单</h3>
+        <p>对账 / 申请开票 / 上传应付发票（OCR）· 收付款只读</p>
         <div class="links">
-          <a href="fee-bill-detail.html?kind=periodic&installment=0&view=lcc&tab=hotel">→ 合作集团应收酒店</a>
-          <a href="fee-bill-detail.html?kind=periodic&installment=0&view=lcc&tab=lcc&item=tech">→ 丽呈应收 · 品牌技术服务费</a>
-          <a href="fee-bill-detail.html?kind=periodic&installment=0&view=lcc&tab=lcc&item=market">→ 丽呈应收 · 市场营销费</a>
-          <a href="fee-bill-detail.html?kind=periodic&installment=0&view=lcc&tab=lcc&item=maintain">→ 丽呈应收 · 系统维护费</a>
-          <a href="fee-bill-detail.html?kind=periodic&installment=1&view=lcc&tab=hotel">→ 分期收取</a>
-          <a href="periodic-fee-detail.html?view=lcc&period=2026-08">→ 周期性费用酒店明细</a>
+          <a href="commission-settle-bill.html?view=group">→ 账单示例 · 两个平台同账（集团视角）</a>
+          <a href="commission-settle-bill.html?view=lcc">→ 同一张账单 · 丽呈视角</a>
+          <a href="settlement-bill-list.html">→ 账单列表</a>
+          <a href="commission-settle-bill.html?view=group&status=待对账">→ 详情 · 待对账</a>
+          <a href="commission-settle-bill.html?view=group&status=有异议">→ 详情 · 有异议</a>
+          <a href="commission-settle-bill.html?view=group&status=待上传发票">→ 详情 · 上传发票</a>
+          <a href="commission-settle-bill.html?view=group&status=已确认">→ 详情 · 已确认</a>
         </div>
       </div>
     </div>
 
-    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">合作集团（只读）</h2>
+    <h2 style="font-size:18px;margin:24px 0 12px;color:var(--text)">丽呈财务端</h2>
     <div class="index-links">
       <div class="index-card">
-        <h3>费用账单</h3>
-        <p>无添加 / 编辑 / 删除</p>
+        <h3>分佣账单</h3>
+        <p>丽呈财务入口在费用管理 / 分佣账单。本期不含一次性费用、周期性费用。</p>
         <div class="links">
-          <a href="fee-bill-detail.html?kind=onetime&channel=mixed&installment=0&view=group&tab=hotel">→ 一次性酒店账单</a>
-          <a href="fee-bill-detail.html?kind=periodic&installment=0&view=group&tab=hotel">→ 周期性酒店账单</a>
-          <a href="periodic-fee-detail.html?view=group&period=2026-08">→ 周期性费用酒店明细</a>
+          <a href="lcc-workbench.html">→ 分佣账单</a>
+        </div>
+      </div>
+      <div class="index-card">
+        <h3>账单管理</h3>
+        <p>异议处理、登记收款/付款、审上传发票</p>
+        <div class="links">
+          <a href="lcc-bill-list.html">→ 账单管理列表</a>
+          <a href="commission-settle-bill.html?view=lcc&status=待对账">→ 待对账</a>
+          <a href="commission-settle-bill.html?view=lcc&status=有异议">→ 处理异议</a>
+          <a href="commission-settle-bill.html?view=lcc&status=待收付款">→ 登记收付款</a>
+          <a href="commission-settle-bill.html?view=lcc&status=待审发票">→ 审发票</a>
+        </div>
+      </div>
+      <div class="index-card">
+        <h3>账户信息</h3>
+        <p>菜单位置：财务配置 / 账户信息。页签：酒店、合作集团。</p>
+        <div class="links">
+          <a href="lcc-group-account.html?entity=hotel">→ 酒店</a>
+          <a href="lcc-group-account.html?entity=group">→ 合作集团 · 收款信息</a>
+          <a href="lcc-group-account.html?entity=group&tab=invoice">→ 合作集团 · 开票信息</a>
         </div>
       </div>
     </div>
