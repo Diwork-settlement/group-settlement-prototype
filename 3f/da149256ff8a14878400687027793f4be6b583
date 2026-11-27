@@ -1,0 +1,20 @@
+index.html
+  s_134cd6e3aeca69::t_6dc2dc879a8a3e 30
+  s_134cd6e3aeca69::t_e4017ba2b4f1ae 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.52-trip",
+  "base_commit_sha": "3fda149256ff8a14878400687027793f4be6b583",
+  "prompts": {},
+  "sessions": {
+    "s_134cd6e3aeca69": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4d738c34-b2ca-4578-bdbb-af9a3f70c4cb",
+        "model": "grok-4.7"
+      },
+      "human_author": "ddxi <ddxi@lpt019775.cn1.global.ctrip.com>"
+    }
+  }
+}
